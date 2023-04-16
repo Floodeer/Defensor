@@ -1,0 +1,7 @@
+name: Defensor
+version: '${project.version}'
+main: com.floodeer.plugins.towerdefense.Towerdefense
+api-version: 1.19
+softdepend: [ Vault ]
+authors: [ Floodeer ]
+description: Tower Defense Minigame
