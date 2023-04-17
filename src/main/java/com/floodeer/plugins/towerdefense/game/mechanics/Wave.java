@@ -21,7 +21,7 @@ public class Wave {
 
     public Wave(String name, Game game) {
         this.game = game;
-        this.name = name;;
+        this.name = name;
 
         spawns = Lists.newArrayList();
         enemies = Lists.newLinkedList();

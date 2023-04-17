@@ -1,17 +1,15 @@
 package com.floodeer.plugins.towerdefense.game.mechanics;
 
 import com.floodeer.plugins.towerdefense.Defensor;
+import com.floodeer.plugins.towerdefense.game.Enums;
 import com.floodeer.plugins.towerdefense.game.Game;
 import com.floodeer.plugins.towerdefense.utils.Util;
-import com.google.common.collect.Lists;
 import lombok.Getter;
 import lombok.Setter;
 
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
-import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.*;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -19,8 +17,6 @@ import org.bukkit.metadata.MetadataValue;
 import org.bukkit.potion.PotionEffect;
 import org.bukkit.potion.PotionEffectType;
 import org.bukkit.scheduler.BukkitTask;
-
-import java.util.List;
 
 public class Enemy {
 
@@ -31,6 +27,7 @@ public class Enemy {
     @Getter @Setter private int damage;
     @Getter @Setter private int killExp;
     @Getter @Setter private int killCoins;
+    @Getter @Setter private int waveUnlocked;
     @Getter private int cost;
 
     @Getter private EntityType entity;
@@ -88,8 +85,8 @@ public class Enemy {
         @Getter private LivingEntity entity;
 
         @Getter @Setter private int pathIndex;
+        @Getter @Setter private int damage;
         @Getter @Setter private double health;
-        @Getter @Setter private double damage;
         @Getter @Setter private double originalSpeed;
         @Getter @Setter private double speed;
         @Getter @Setter private int killExp;

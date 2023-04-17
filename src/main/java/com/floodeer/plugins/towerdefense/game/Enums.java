@@ -1,5 +1,6 @@
-package com.floodeer.plugins.towerdefense.game.mechanics;
+package com.floodeer.plugins.towerdefense.game;
 
+import com.floodeer.plugins.towerdefense.utils.Util;
 import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.inventory.ItemStack;
@@ -20,13 +21,13 @@ public class Enums {
         }
     }
 
-    protected enum Difficulty {
-        EASY("Fácil"),
-        NORMAL("Normal"),
-        HARD("Difícil"),
-        EXPERT("Especialista"),
-        INSANE("Insano"),
-        SPECIAL("Especial");
+    public enum Difficulty {
+        EASY("&bFácil"),
+        NORMAL("&aNormal"),
+        HARD("&cDifícil"),
+        EXPERT("&4Especialista"),
+        INSANE("&4&lInsano"),
+        SPECIAL("&8&lEspecial");
 
         String name;
 
@@ -48,7 +49,26 @@ public class Enums {
 
         @Override
         public String toString() {
-            return name;
+            return Util.color(name);
+        }
+    }
+
+    public enum GameState {
+        PRE_GAME("&aAguardando"),
+        STARTING("&eIniciando"),
+        IN_GAME("&cEm jogo"),
+        ENDING("&4Encerrando"),
+        RESTORING("&bReiniciando");
+
+        String state;
+
+        GameState(String state) {
+            this.state = state;
+        }
+
+        @Override
+        public String toString() {
+            return Util.color(state);
         }
     }
 }

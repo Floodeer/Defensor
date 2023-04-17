@@ -3,7 +3,7 @@ package com.floodeer.plugins.towerdefense.game.towers;
 import com.floodeer.plugins.towerdefense.Defensor;
 import com.floodeer.plugins.towerdefense.game.Game;
 import com.floodeer.plugins.towerdefense.game.mechanics.Enemy;
-import com.floodeer.plugins.towerdefense.game.mechanics.Enums;
+import com.floodeer.plugins.towerdefense.game.Enums;
 import com.floodeer.plugins.towerdefense.utils.Util;
 import lombok.Getter;
 import lombok.Setter;
@@ -33,7 +33,7 @@ public class Tower {
 
     @Getter @Setter private int damage;
     @Getter @Setter private int range;
-    @Getter @Setter int attackSpeed;
+    @Getter @Setter private int attackSpeed;
     @Getter @Setter private boolean multiTarget;
     @Getter @Setter private int maxTargets;
 
@@ -53,7 +53,7 @@ public class Tower {
         private List<TowerLocation> locations;
 
         @Getter @Setter private int killsMade = 0;
-        @Getter @Setter private int damageDealt= 0;
+        @Getter @Setter private int damageDealt = 0;
         @Getter @Setter private int damage;
         @Getter @Setter private int range;
         @Getter @Setter private int ticks;
@@ -64,7 +64,6 @@ public class Tower {
         @Getter private final Map<PlacedTower, String> towerSpecialSkill;
 
         private Inventory towerInterface;
-
 
         private PlacedTower(Game game, Player owner, List<TowerLocation> locations, Location center, Hologram hologram, Tower tower) {
             this.game = game;
@@ -81,14 +80,14 @@ public class Tower {
             this.towerSpecialSkill = tower.getTowerSpecialSkill();
         }
 
-        public void onTick(int tick) {
-            ticks++;
+        public void onTick() {
+            ticks+=10;
             if(ticks >= attackSpeed) {
                 ticks = 0;
             }
 
             int total = 0;
-            for(Enemy.AliveEnemy enemy : game.getEnemies()) {
+            for(Enemy.AliveEnemy enemy : Defensor.get().getMechanicsManager().getActiveEnemies(getGame())) {
                 if(enemy.getEntity().isValid() && isInRange(enemy.getEntity().getLocation())) {
                     if (enemy.getEntity().getHealth() - this.damage > 0.5D) {
                         enemy.getEntity().setHealth(enemy.getEntity().getHealth() - this.damage);

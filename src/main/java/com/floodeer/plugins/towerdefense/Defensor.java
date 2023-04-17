@@ -1,5 +1,7 @@
 package com.floodeer.plugins.towerdefense;
 
+import com.floodeer.plugins.towerdefense.manager.GameMechanicsManager;
+import com.floodeer.plugins.towerdefense.manager.PlayerManager;
 import com.floodeer.plugins.towerdefense.utils.update.Updater;
 import de.slikey.effectlib.EffectManager;
 import lombok.Getter;
@@ -12,6 +14,8 @@ public final class Defensor extends JavaPlugin {
 
     private static Defensor main;
     @Getter private EffectManager effectManager;
+    @Getter private PlayerManager playerManager;
+    @Getter private GameMechanicsManager mechanicsManager;
 
     public static Defensor get() {
         return main;
@@ -25,7 +29,9 @@ public final class Defensor extends JavaPlugin {
         if(!skins.exists())
             skins.mkdirs();
 
-        effectManager = new EffectManager(this);
+        this.effectManager = new EffectManager(this);
+        this.playerManager = new PlayerManager();
+        this.mechanicsManager = new GameMechanicsManager();
         getServer().getScheduler().runTaskTimer(this, new Updater(this), 20, 1);
     }
 
