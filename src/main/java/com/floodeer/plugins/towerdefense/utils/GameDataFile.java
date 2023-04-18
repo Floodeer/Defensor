@@ -1,10 +1,12 @@
 package com.floodeer.plugins.towerdefense.utils;
 
+import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.configuration.file.YamlConfigurationOptions;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Set;
 
 public class GameDataFile {
 
@@ -210,10 +212,18 @@ public class GameDataFile {
 
     }
 
-    public YamlConfigurationOptions options() {
+    public ConfigurationSection getConfigSection(String value) {
+        return yaml.getConfigurationSection(value);
+    }
+
+    public YamlConfigurationOptions getOptions() {
 
         return this.yaml.options();
 
+    }
+
+    public YamlConfiguration getYamlConfiguration() {
+        return yaml;
     }
 
 }

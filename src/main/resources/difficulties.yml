@@ -1,0 +1,81 @@
+Difficulties:
+  FACIL:
+    health_modifier: 0.75
+    coins-when-beat: 150
+    final-wave: 15
+    player-health: 100
+    enemies-per-wave: 17
+    enemies-wave-modifier: 1.07
+    enemy-coins-per-wave: 16
+    enemy-coins-wave-modifier: 1.15
+    description: ['&b- Inimigos tem 75% da vida normal',
+                  '&c- Inimigos não aumentam muito em força',
+                  '&c- e quantidade', '&a- Vida: 100',
+                  '&6- Rodada final: 15']
+    material: 'WOOD_SWORD'
+  NORMAL:
+    health_modifier: 1.0
+    coins-when-beat: 250
+    final-wave: 20
+    player-health: 75
+    enemies-per-wave: 20
+    enemies-wave-modifier: 1.07
+    enemy-coins-per-wave: 20
+    enemy-coins-wave-modifier: 1.25
+    description: ['&b- Inimigos tem sua vida normal',
+                  '&a- Vida: 75',
+                  '&6- Rodada final: 20']
+    material: 'STONE_SWORD'
+  DIFICIL:
+    health_modifier: 1.25
+    coins-when-beat: 350
+    final-wave: 25
+    player-health: 50
+    enemies-per-wave: 25
+    enemies-wave-modifier: 1.1
+    enemy-coins-per-wave: 25
+    enemy-coins-wave-modifier: 1.35
+    description: ['&b- Inimigos tem 125% da vida normal',
+                  '&c- Inimigos aumentam rapidamente e recebem mais força',
+                  '&a- Vida: 50', '&6- Rodada final: 25']
+    material: 'IRON_SWORD'
+  EXPERIENTE:
+    health_modifier: 1.5
+    coins-when-beat: 500
+    final-wave: 30
+    player-health: 30
+    enemies-per-wave: 30
+    enemies-wave-modifier: 1.14
+    enemy-coins-per-wave: 30
+    enemy-coins-wave-modifier: 1.4
+    description: ['&b- Inimigos tem 125% da vida normal',
+                  '&c- Inimigos aumentam rapidamente e recebem mais força',
+                  '&c- EXP extra por rodadas!', '&a- Vida: 30',
+                  '&6- Rodada final: 30']
+    material: 'DIAMOND_SWORD'
+  PESADELO:
+    health_modifier: 2.0
+    coins-when-beat: 2000
+    final-wave: 75
+    player-health: 30
+    enemies-per-wave: 45
+    enemies-wave-modifier: 1.34
+    enemy-coins-per-wave: 100
+    enemy-coins-wave-modifier: 1.7
+    description: [ '&c&lModo Pesadelo',
+                   ' ',
+                  '&c- Inimigos tem &4&l200% da vida normal',
+                  '&c- Inimigos aumentam rapidamente e recebem mais força',
+                  '&a- Vida: &c30', '&6- Rodada final &c&l75']
+    material: 'DIAMOND_SWORD'
+  ESPECIAL:
+    health_modifier: 1.0
+    coins-when-beat: -1
+    final-wave: -1
+    player-health: 75
+    enemies-per-wave: 20
+    enemies-wave-modifier: 1.07
+    enemy-coins-per-wave: 20
+    enemy-coins-wave-modifier: 1.25
+    description: ['&b- Inimigos tem a vida normal', '&a- Vida: 75', '&6- Rodadas infinitas!']
+    material: 'BEDROCK'

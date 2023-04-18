@@ -1,12 +1,50 @@
 package com.floodeer.plugins.towerdefense.game;
 
+import com.floodeer.plugins.towerdefense.Defensor;
 import com.floodeer.plugins.towerdefense.utils.Util;
+import jdk.internal.org.jline.utils.DiffHelper;
 import lombok.Getter;
 import lombok.Setter;
+import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.inventory.ItemStack;
+
+import java.io.*;
+import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 
 public class Enums {
 
+    //Difficulty handling
+
+    private static YamlConfiguration config;
+
+    public static void loadAll() throws IOException {
+
+        File file = new File(Defensor.get().getDataFolder() + File.separator + "difficulties.yml");
+        try (Reader reader = new InputStreamReader(new FileInputStream(file), StandardCharsets.UTF_8)) {
+            config = YamlConfiguration.loadConfiguration(reader);
+        } catch (UnsupportedEncodingException | FileNotFoundException ex) {
+            config = YamlConfiguration.loadConfiguration(file);
+        }
+
+        Arrays.asList(Difficulty.values()).forEach(difficulty -> {
+            String name = "Difficulties." + difficulty.name() + ".";
+            difficulty.healthModifier = getConfig().getDouble(name + "health_modifier");
+            difficulty.rewardedCoins = getConfig().getInt(name + "coins-when-beat");
+            difficulty.finalWave = getConfig().getInt(name + "final-wave");
+            difficulty.enemiesPerWave = getConfig().getInt(name + "enemies-per-wave");
+            difficulty.enemiesPerWaveModifier = getConfig().getDouble(name + "enemies-wave-modifier");
+            difficulty.enemyCoinsPerWave = getConfig().getInt(name + "enemy-coins-per-wave");
+            difficulty.enemyCoinsWaveModifier = getConfig().getDouble(name + "enemy-coins-wave-modifier");
+            difficulty.playerHealth = getConfig().getInt(name + "player-health");
+        });
+    }
+
+
+
+    public static YamlConfiguration getConfig() {
+        return config;
+    }
 
     public enum TowerEffects {
         BURN("BURN"),
@@ -22,15 +60,14 @@ public class Enums {
     }
 
     public enum Difficulty {
-        EASY("&bFácil"),
-        NORMAL("&aNormal"),
-        HARD("&cDifícil"),
-        EXPERT("&4Especialista"),
-        INSANE("&4&lInsano"),
-        SPECIAL("&8&lEspecial");
+        FACIL("Facil"),
+        NORMAL("Normal"),
+        DIFICIL("Dificil"),
+        ESPECIALISTA("Especialista"),
+        PESADELO("Pesadelo"),
+        ESPECIAL("Especial");
 
         String name;
-
         @Getter @Setter int rewardedCoins;
         @Getter @Setter int finalWave;
         @Getter @Setter int enemiesPerWave;
@@ -49,7 +86,29 @@ public class Enums {
 
         @Override
         public String toString() {
-            return Util.color(name);
+            return name;
+        }
+
+        public String getColoredName() {
+            switch(this) {
+                case FACIL:
+                    return "&aFácil";
+                case NORMAL:
+                    return "&bNormal";
+                case DIFICIL:
+                    return "&cDifícil";
+                case ESPECIAL:
+                    return "&9Especialista";
+                case PESADELO:
+                    return "&e&lPesadelo";
+                case ESPECIALISTA:
+                    return "&eEspecial";
+            }
+            return toString();
+        }
+
+        public static Difficulty fromName(String str) {
+            return Arrays.stream(Difficulty.values()).filter(cur -> cur.toString().equalsIgnoreCase(str)).findAny().orElse(null);
         }
     }
 

@@ -21,51 +21,32 @@ import java.util.*;
 
 public class Game implements Listener {
 
-    @Getter
-    private final String name;
-    @Getter
-    private final GameArena arena;
-    @Getter
-    Game game = this;
-    @Getter
-    @Setter
-    Enums.GameState state;
-    @Getter
-    Enums.Difficulty difficulty;
-    @Getter
-    @Setter
-    private int timer = 0;
-    @Getter
-    @Setter
-    private int startCountdown;
-    @Getter
-    private Map<GamePlayer, Double> players;
-    @Getter
-    private LinkedHashMap<Enemy, Integer> enemies;
-    @Getter
-    private List<Tower.PlacedTower> towers;
-    @Getter
-    @Setter
-    private int currentWave;
-    @Getter
-    @Setter
-    private int currentHealth;
-    @Getter
-    @Setter
-    private int maxEnemies;
-    @Getter
-    @Setter
-    private int enemyCoins;
-    @Getter
-    @Setter
-    private int enemyCost;
-    @Getter
-    @Setter
-    private boolean waveActive;
+    @Getter private final String name;
+    @Getter Game game = this;
+
+    //If using @Getter, GameArena has to be set using @Setter
+    @Getter @Setter private GameArena arena;
+
+    @Getter @Setter Enums.GameState state;
+    @Getter Enums.Difficulty difficulty;
+
+    @Getter @Setter private int timer = 0;
+    @Getter @Setter private int startCountdown;
+
+    @Getter private Map<GamePlayer, Double> players;
+    @Getter private List<Tower.PlacedTower> towers;
+    @Getter  LinkedHashMap<Enemy, Integer> summon;
+
+    @Getter @Setter private int currentWave;
+    @Getter @Setter private int currentHealth;
+    @Getter @Setter private int maxEnemies;
+    @Getter @Setter private int enemyCoins;
+    @Getter @Setter private int enemyCost;
+    @Getter @Setter private boolean waveActive;
 
     public Game(String name, boolean load) {
         this.name = name;
-        this.arena = new GameArena(name);
+        setArena(new GameArena(name));
 
         if (load) {
             setState(Enums.GameState.PRE_GAME);
@@ -75,31 +56,61 @@ public class Game implements Listener {
     }
 
     private void loadGame() {
-        enemies = Maps.newLinkedHashMap();
         towers = Lists.newArrayList();
+        players = Maps.newHashMap();
+        summon = Maps.newLinkedHashMap();
+
+        this.difficulty = getArena().getDifficulty();
 
         Defensor.get().getServer().getPluginManager().registerEvents(this, Defensor.get());
     }
+
+    public void addPlayer(GamePlayer gp) {
+        gp.setGame(this);
+        gp.getPlayer().teleport(getArena().getLocation(GameArena.LocationType.LOBBY.toString()));
+        getPlayers().put(gp, 3000D);
+    }
+
+    public void removePlayer(GamePlayer gp, boolean force, boolean leave) {
+        gp.setGame(null);
+    }
+
+    public void start() {
+        setState(Enums.GameState.IN_GAME);
+        getPlayers().keySet().forEach(cur -> cur.getPlayer().teleport(getArena().getLocation(GameArena.LocationType.PLAYER_SPAWN.toString())));
+
+        setCurrentHealth(getDifficulty().playerHealth);
+        setEnemyCoins(getDifficulty().enemyCoinsPerWave);
+        setMaxEnemies(getDifficulty().enemiesPerWave);
+
+        Defensor.get().getMechanicsManager().start(this);
+        nextWave();
+    }
+
 
     @EventHandler
     public void onGameTick(UpdateEvent event) {
         if (event.getType() == UpdateType.FAST) { //ticks every 500ms (10 ticks, 0.5s), Tower and Scoreboard logic
 
             updateScoreboard();
-            getTowers().forEach(Tower.PlacedTower::onTick);
+
+            if(getState() == Enums.GameState.IN_GAME)
+                getTowers().forEach(Tower.PlacedTower::onTick);
 
         } else if (event.getType() == UpdateType.SEC) { //ticks every 1000ms (20 ticks, 1s), Wave logic
-            if (isWaveActive() && getEnemies().size() <= 0) {
+            if(getState() != Enums.GameState.IN_GAME)
+                return;
+
+            if (isWaveActive() && !hasLivingEnemies()) {
                 setWaveActive(false);
                 nextWave();
-
-                ++timer;
             }
+            ++timer;
         }
     }
 
     public void nextWave() {
-        if (currentHealth == getDifficulty().finalWave) {
+        if (getCurrentWave() == getDifficulty().finalWave) {
             endGame(true);
             return;
         }
@@ -110,6 +121,7 @@ public class Game implements Listener {
                 cur.msg("&aVocê quebrou seu recorde pessoal de Rodadas sobrevividas!");
             }
         });
+
         if (getCurrentWave() != 0) {
             setMaxEnemies((int) (getMaxEnemies() * getDifficulty().getEnemiesPerWaveModifier()));
         }
@@ -135,13 +147,12 @@ public class Game implements Listener {
                 });
             }
             spawnEnemies();
-        }, 60 * 20);
+        }, 5 * 20); //TODO testing
     }
 
     public void spawnEnemies() {
-        //AI summoning system for single player, may not work? not tested yet
 
-        int totalEnemies = this.enemies.values().size();
+        int totalEnemies = getEnemies().size();
 
         if (totalEnemies >= this.maxEnemies) {
             return;
@@ -149,7 +160,7 @@ public class Game implements Listener {
 
         List<Enemy> availableEnemies = new ArrayList<>((Defensor.get().getMechanicsManager().getEnemies()).values());
 
-        if (getDifficulty() == Enums.Difficulty.SPECIAL)
+        if (getDifficulty() == Enums.Difficulty.PESADELO)
             Collections.shuffle(availableEnemies);
         else
             Collections.reverse(availableEnemies);
@@ -162,7 +173,7 @@ public class Game implements Listener {
             for (Enemy enemy : availableEnemies) {
                 if (this.enemyCoins >= enemy.getCost() && this.currentWave >= enemy.getWaveUnlocked()) {
                     this.enemyCoins -= enemy.getCost();
-                    this.enemies.put(enemy, getEnemies().containsKey(enemy) ? getEnemies().get(enemy) + 1 : 1);
+                    this.summon.put(enemy, this.summon.containsKey(enemy) ? this.summon.get(enemy) + 1 : 1);
                     enemySummoned = true;
                     break;
                 }
@@ -174,15 +185,12 @@ public class Game implements Listener {
 
             totalEnemies++;
 
-            getEnemies().entrySet().removeIf(entry -> entry.getValue() >= maxEnemies && entry.getKey().getCost() > 0);
-            availableEnemies.removeAll(getEnemies().keySet());
+            getSummon().entrySet().removeIf(entry -> entry.getValue() >= maxEnemies && entry.getKey().getCost() > 0);
+            availableEnemies.removeAll(getSummon().keySet());
         }
 
-        for (Map.Entry<Enemy, Integer> entry : getEnemies().entrySet()) {
-            Defensor.get().getMechanicsManager().spawn(this, entry.getKey(), entry.getValue());
-        }
-
-        this.enemies.clear();
+        getSummon().keySet().forEach(cur -> Defensor.get().getMechanicsManager().spawn(getGame(), cur, summon.get(cur)));
+        this.summon.clear();
     }
 
     public void damage(int amount) {
@@ -198,6 +206,15 @@ public class Game implements Listener {
 
     }
 
+    public void shutdown(boolean force, boolean recreate) {
+
+    }
+
+    public void restore(boolean recreate) {
+        Defensor.get().getMechanicsManager().stop(this);
+        Defensor.get().getGameManager().recreateGame(this);
+    }
+
     private void updateScoreboard() {
         getPlayers().keySet().forEach(player -> {
             GameScoreboard scoreboard;
@@ -207,28 +224,36 @@ public class Game implements Listener {
                 scoreboard = GameScoreboard.createScore(player.getPlayer());
                 scoreboard.setTitle("&6&lDEFENSOR");
             }
-            if (getState() == Enums.GameState.PRE_GAME || getState() == Enums.GameState.STARTING) {
+            if (getState() == Enums.GameState.IN_GAME || getState() == Enums.GameState.ENDING) {
                 scoreboard.setSlotsFromList(Lists.newArrayList(
                         Util.createSpacer(),
-                        "&fMapa: &a" + getName(),
-                        "&fPlayers: &a" + getPlayers().size(),
+                        Util.color("&fMapa: &a" + getName()),
+                        Util.color("&fPlayers: &a" + getPlayers().size()),
                         Util.createSpacer(),
-                        "&fRodada: &a" + getCurrentWave(),
-                        "&fDificuldade: " + getDifficulty().toString(),
-                        "&fVida: &a" + getCurrentHealth(),
+                        Util.color("&fRodada: &a" + getCurrentWave()),
+                        Util.color("&fDificuldade: " + getDifficulty().getColoredName()),
+                        Util.color("&fVida: &a" + getCurrentHealth()),
                         Util.createSpacer(),
-                        "&fTempo: &a" + TimeUtils.formatScoreboard(getTimer())));
+                        Util.color("&fTempo: &a" + TimeUtils.formatScoreboard(getTimer()))));
             } else {
                 scoreboard.setSlotsFromList(Lists.newArrayList(
                         Util.createSpacer(),
-                        "&fMapa: &a" + getName(),
-                        "&fPlayers: &b" + getPlayers().size() + "/" + getArena().getMaxPlayers(),
-                        "&fNecessários: &b" + getArena().getMinPlayers(),
+                        Util.color("&fMapa: &a" + getName()),
+                        Util.color("&fPlayers: &b" + getPlayers().size() + "/" + getArena().getMaxPlayers()),
+                        Util.color("&fNecessários: &b" + getArena().getMinPlayers()),
                         Util.createSpacer(),
-                        "&fEstado: &f" + getState().toString(),
+                        Util.color("&fEstado: &f" + getState().toString()),
                         Util.createSpacer(),
-                        "&fSaldo: &b" + player.getBalance()));
+                        Util.color("&fSaldo: &b" + player.getBalance())));
             }
         });
+    }
+
+    public List<Enemy.AliveEnemy> getEnemies() {
+        return Defensor.get().getMechanicsManager().getActiveEnemies(this);
+    }
+
+    public boolean hasLivingEnemies() {
+        return (getEnemies().size() > 0);
     }
 }

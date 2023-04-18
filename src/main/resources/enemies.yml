@@ -1,0 +1,16 @@
+Enemies:
+  DEFAULT_ZOMBIE:
+    Entity: ZOMBIE
+    Cost: -1
+    Coins-On-Kill: 2
+    Exp-On-Kill: 1
+    Health: 10
+    Damage: 1
+    Wave-Unlocked: 1
+    Speed: 0.25
+    Equipment:
+      Helmet: 'LEATHER_HELMET : dye:red'
+      Chestplate: 'LEATHER_CHESTPLATE : dye:red'
+      Leggings: 'LEATHER_LEGGINGS : dye:red'
+      Boots: 'LEATHER_BOOTS : dye:red'
+      Hand: 'AIR'

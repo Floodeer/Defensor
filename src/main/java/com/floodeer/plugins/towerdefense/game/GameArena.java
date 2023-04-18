@@ -6,13 +6,15 @@ import com.floodeer.plugins.towerdefense.utils.GameDataYaml;
 import com.floodeer.plugins.towerdefense.utils.Util;
 import com.google.common.collect.Lists;
 import lombok.Getter;
+import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
-import org.json.simple.JSONObject;
-import org.json.simple.parser.JSONParser;
-import org.json.simple.parser.ParseException;
 
 import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
 
 public class GameArena {
@@ -22,7 +24,7 @@ public class GameArena {
     @Getter private GameDataFile gameDataFile;
     @Getter private File gameFolder;
 
-    @Getter private final List<Location> pathIndex;
+    @Getter private final List<Location> path;
 
     public GameArena(String name) {
         this.name = name;
@@ -31,14 +33,21 @@ public class GameArena {
             gameDataFile = GameDataYaml.getMap(name);
         }
 
-        pathIndex = Lists.newArrayList();
+        path = Lists.newArrayList();
     }
 
     public void load() {
-        if (!pathIndex.isEmpty())
-            pathIndex.clear();
+        gameDataFile.getStringList("Locations.path").forEach(cur -> path.add(Util.getLocationFromString(cur)));
+    }
 
-        pathIndex.addAll(paths());
+    public void addPath(Location l) {
+        if (!gameDataFile.contains("Locations.path"))
+            gameDataFile.createNewStringList("Locations.path", new ArrayList<>());
+
+        List<String> way = gameDataFile.getStringList("Locations.path");
+        way.add(Util.getStringFromLocation(l, true));
+        gameDataFile.set("Locations.path", way);
+        gameDataFile.save();
     }
 
 
@@ -51,37 +60,18 @@ public class GameArena {
         gameDataFile.add("Map.MaxPlayers", 4);
         gameDataFile.save();
 
+        gameFolder = new File(Defensor.get().getDataFolder() + File.separator + "maps" + File.separator + name);
 
     }
 
-    private List<Location> paths() {
-        List<Location> locations = Lists.newArrayList();
-        List<String> way = gameDataFile.getStringList("Locations.paths");
-        for (String s : way) {
-            JSONObject jsonObject = null;
-            try {
-                jsonObject = (JSONObject) new JSONParser().parse(s);
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            locations.add(Util.getLocation(jsonObject, true));
-        }
-        return locations;
+    public void deleteArena() {
+
     }
 
-    public void addPath(Location l) {
-        if (!gameDataFile.contains("Locations.paths")) {
-            gameDataFile.createNewStringList("Locations.paths", Lists.newArrayList());
-        }
-        List<String> way = gameDataFile.getStringList("Locations.paths");
-        way.add(Util.saveLocation(l, true));
-        gameDataFile.set("Locations.paths", way);
-        gameDataFile.save();
+    public Enums.Difficulty getDifficulty() {
+        return Enums.Difficulty.fromName(gameDataFile.getString("Difficulty"));
     }
 
-    public List<Location> getPathIndex() {
-        return pathIndex;
-    }
 
     public void setMinPlayers(int x) {
         gameDataFile.set("Map.MinPlayers", x);
@@ -117,6 +107,16 @@ public class GameArena {
         return new Location(Bukkit.getWorld(world), x, y, z, yaw, pitch);
     }
 
+    public void setLocation(LocationType type, Location loc) {
+        gameDataFile.set("Locations." + LocationType.toString(type) + ".world", loc.getWorld().getName());
+        gameDataFile.set("Locations." + LocationType.toString(type) + ".x", loc.getX());
+        gameDataFile.set("Locations." + LocationType.toString(type) + ".y", loc.getY());
+        gameDataFile.set("Locations." + LocationType.toString(type) + ".z", loc.getZ());
+        gameDataFile.set("Locations." + LocationType.toString(type) + ".pitch", loc.getPitch());
+        gameDataFile.set("Locations." + LocationType.toString(type) + ".yaw", loc.getYaw());
+        gameDataFile.save();
+    }
+
     public boolean doesMapExists() {
         File mapsFolder = new File(Defensor.get().getDataFolder() + File.separator + "maps");
         for (File files : mapsFolder.listFiles()) {
@@ -127,4 +127,22 @@ public class GameArena {
         return false;
     }
 
+    public enum LocationType {
+       MOB_SPAWN("MOB_SPAWN"), PLAYER_SPAWN("PLAYER_SPAWN"), LOBBY("LOBBY");
+
+        String type;
+
+        LocationType(String str) {
+            this.type = str;
+        }
+
+        @Override
+        public String toString() {
+            return type;
+        }
+
+        public static String toString(LocationType type) {
+            return type.toString();
+        }
+    }
 }

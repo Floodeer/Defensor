@@ -1,41 +1,48 @@
 package com.floodeer.plugins.towerdefense.utils;
 
-import com.floodeer.plugins.towerdefense.Defensor;
-
-import de.slikey.effectlib.effect.ExplodeEffect;
-import de.slikey.effectlib.util.DynamicLocation;
+import org.apache.commons.lang3.StringEscapeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Location;
+import org.bukkit.World;
 import org.json.simple.JSONObject;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 public class Util {
 
-    private static String healthString;
+    private static String healthString = "";
 
     public static String color(String msg) {
         return ChatColor.translateAlternateColorCodes('&', msg);
     }
 
-    static {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < 10; ) {
-            sb.append(healthString).append("▮");
-            i++;
+    public static List<String> colorList(List<String> list) {
+        ArrayList<String> strings = new ArrayList<String>();
+        for (String str : list) {
+            strings.add(ChatColor.translateAlternateColorCodes('&', color(str)));
         }
-        healthString = sb.toString();
+
+        return strings;
     }
 
+
+
     public static String getHealth(double health, double maxHealth) {
+        if(healthString.equalsIgnoreCase("")) {
+            for (int i = 0; i < 10; i++) {
+                healthString = healthString + StringEscapeUtils.unescapeJava("▌");
+            }
+        }
 
         if (health == maxHealth)
             return ChatColor.GREEN + healthString;
         int i = (int)(health / maxHealth * 10.0D);
         if (i < 1)
             return ChatColor.GRAY + healthString;
-        return ChatColor.GREEN + healthString.substring(0, i) + ChatColor.GRAY + healthString.substring(i);
+        return ChatColor.GREEN + healthString.substring(0, i) + ChatColor.GRAY + healthString.substring(i, healthString.length());
     }
 
     public static String createSpacer() {
@@ -58,12 +65,7 @@ public class Util {
     }
 
     public static void createFakeExplosion(Location loc, int amount, float size) {
-        ExplodeEffect effect = new ExplodeEffect(Defensor.get().getEffectManager());
-        effect.setDynamicOrigin(new DynamicLocation(loc));
-        effect.iterations = 1;
-        effect.amount = amount;
-        effect.particleSize = size;
-        effect.start();
+        //TODO remove EffectLib dependency
     }
 
     public static String saveLocation(Location location, boolean yawPitch) {
@@ -106,5 +108,17 @@ public class Util {
         } else {
             return new Location(Bukkit.getWorld(world), x, y, z);
         }
+    }
+
+    public static String getStringFromLocation(Location loc, boolean center) {
+        return loc.getWorld().getName() + ", " + (loc.getBlockX() + (center ? 0.5D : 0.0D)) + ", " + loc.getBlockY() + ", " + (loc.getBlockZ() + (center ? 0.5D : 0.0D)) + ", " + loc.getYaw() + ", " + loc.getPitch();
+    }
+
+    public static Location getLocationFromString(String paramString) {
+        String[] locationData = paramString.split(", ");
+        World world = Bukkit.getWorld(locationData[0]);
+        double x = Double.parseDouble(locationData[1]), y = Double.parseDouble(locationData[2]), z = Double.parseDouble(locationData[3]);
+        float pitch = Float.parseFloat(locationData[4]), yaw = Float.parseFloat(locationData[5]);
+        return new Location(world, x, y, z, pitch, yaw);
     }
 }

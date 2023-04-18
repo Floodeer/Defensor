@@ -7,6 +7,7 @@ import com.floodeer.plugins.towerdefense.utils.Util;
 import lombok.Getter;
 import lombok.Setter;
 
+import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -30,14 +31,15 @@ public class Enemy {
     @Getter @Setter private int waveUnlocked;
     @Getter private int cost;
 
-    @Getter private EntityType entity;
+    @Getter private final EntityType entity;
     @Getter private EntityEquipment entityEquipment;
 
-    public Enemy(String name, FileConfiguration configFile, boolean boss) {
+    public Enemy(FileConfiguration configFile, String name, boolean boss) {
         this.name = name;
 
         String configPath = boss ? "Bosses." : "Enemies." + name + ".";
 
+        entity = EntityType.valueOf(configFile.getString(configPath + "Entity"));
         cost = configFile.getInt(configPath + "Cost");
         health = configFile.getInt(configPath + "Health");
         damage = configFile.getInt(configPath + "Damage");
@@ -45,7 +47,7 @@ public class Enemy {
         killExp = configFile.getInt(configPath + "Exp-Per-Kill");
         killCoins = configFile.getInt(configPath + "Coins-Per-Kill");
 
-        this.speed = 0.25D;
+        this.speed = 0.64D;
     }
 
     public AliveEnemy spawn(Location location, Enums.Difficulty difficulty) {
@@ -63,15 +65,16 @@ public class Enemy {
         }
 
         mob.setCollidable(false);
-        mob.getEquipment().setItemInMainHand(entityEquipment.getItemOnHand());
-        mob.getEquipment().setArmorContents(entityEquipment.toArray());
-
+        // mob.getEquipment().setItemInMainHand(entityEquipment.getItemOnHand());
+        // mob.getEquipment().setArmorContents(entityEquipment.toArray());
+        
         mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(this.getHealth() * difficulty.getHealthModifier());
         mob.setHealth(mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());
         mob.setCustomName(Util.getHealth(mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue(), mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue()));
         mob.setCustomNameVisible(true);
-        mob.setMetadata("DefensorEntity", (MetadataValue)new FixedMetadataValue(Defensor.get(), this.name.toLowerCase()));
-        mob.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, Integer.MAX_VALUE, Integer.MAX_VALUE));
+        mob.setMetadata("DefensorEntity", new FixedMetadataValue(Defensor.get(), this.name.toLowerCase()));
+
+        mob.addPotionEffect(new PotionEffect(PotionEffectType.SLOW, 9999, 9999));
         if (mob.getVehicle() != null)
             mob.getVehicle().remove();
 
@@ -85,6 +88,7 @@ public class Enemy {
         @Getter private LivingEntity entity;
 
         @Getter @Setter private int pathIndex;
+        @Getter @Setter private Location targetLocation;
         @Getter @Setter private int damage;
         @Getter @Setter private double health;
         @Getter @Setter private double originalSpeed;
@@ -106,6 +110,10 @@ public class Enemy {
             this.killExp = enemy.getKillExp();
 
             this.entity = entity;
+        }
+
+        public void nextIndex() {
+            ++pathIndex;
         }
     }
 
