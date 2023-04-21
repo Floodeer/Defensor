@@ -36,6 +36,9 @@ public class PlayerManager {
     }
 
     public void removePlayer(UUID uuid) {
+        if(getPlayer(uuid).isInGame())
+            getPlayer(uuid).getGame().removePlayer(getPlayer(uuid), false, true);
+
         onlinePlayers.remove(uuid);
     }
 

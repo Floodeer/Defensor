@@ -1,8 +1,11 @@
 package com.floodeer.plugins.towerdefense;
 
+import com.floodeer.plugins.towerdefense.database.Database;
+import com.floodeer.plugins.towerdefense.database.SQLite;
 import com.floodeer.plugins.towerdefense.game.Enums;
 import com.floodeer.plugins.towerdefense.listeners.EntityListener;
 import com.floodeer.plugins.towerdefense.listeners.PlayerListener;
+import com.floodeer.plugins.towerdefense.manager.DataManager;
 import com.floodeer.plugins.towerdefense.manager.GameManager;
 import com.floodeer.plugins.towerdefense.manager.GameMechanicsManager;
 import com.floodeer.plugins.towerdefense.manager.PlayerManager;
@@ -14,6 +17,7 @@ import org.bukkit.plugin.java.JavaPlugin;
 
 import java.io.File;
 import java.io.IOException;
+import java.sql.SQLException;
 
 
 public final class Defensor extends JavaPlugin {
@@ -23,6 +27,8 @@ public final class Defensor extends JavaPlugin {
     @Getter private GameMechanicsManager mechanicsManager;
     @Getter private GameManager gameManager;
     @Getter private ConfigOptions configOptions;
+    @Getter private Database database;
+    @Getter private DataManager dataManager;
 
     public static Defensor get() {
         return main;
@@ -31,6 +37,9 @@ public final class Defensor extends JavaPlugin {
     @Override
     public void onEnable() {
         main = this;
+
+        if(!setupDatabase())
+            return;
 
         File skins = new File(this.getDataFolder() + File.separator + "skins");
         if(!skins.exists())
@@ -75,7 +84,18 @@ public final class Defensor extends JavaPlugin {
         gameManager.shutdownGames();
     }
 
-    private void loadEnemies() {
+    private boolean setupDatabase()  {
+        if(database instanceof SQLite) {
+            try {
+                database = new SQLite();
+                database.createTables();
+            } catch (ClassNotFoundException | IOException | SQLException  e) {
+                e.printStackTrace();
+                return false;
+            }
+        }
 
+        dataManager = new DataManager();
+        return true;
     }
 }

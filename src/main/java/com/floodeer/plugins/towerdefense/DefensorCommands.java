@@ -4,8 +4,10 @@ import com.floodeer.plugins.towerdefense.database.data.GamePlayer;
 import com.floodeer.plugins.towerdefense.game.Enums;
 import com.floodeer.plugins.towerdefense.game.Game;
 import com.floodeer.plugins.towerdefense.game.GameArena;
+import com.floodeer.plugins.towerdefense.utils.ProtocolUtils;
 import com.floodeer.plugins.towerdefense.utils.Runner;
 import com.floodeer.plugins.towerdefense.utils.Util;
+import net.citizensnpcs.api.CitizensAPI;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -19,6 +21,11 @@ public class DefensorCommands implements CommandExecutor {
             return true;
         }
 
+        if(args[0].equalsIgnoreCase("test")) {
+            Player p = (Player) commandSender;
+            ProtocolUtils.playNPCAttackAnimation(CitizensAPI.getDefaultNPCSelector().getSelected(p));
+            p.sendMessage(Util.color("&aTestado!"));
+        }
         if(args[0].equalsIgnoreCase("create")) {
 
             if(!commandSender.hasPermission("defensor.admin"))
@@ -211,19 +218,51 @@ public class DefensorCommands implements CommandExecutor {
                 gp.getGame().removePlayer(gp, false, true);
             }
         }else if(args[0].equalsIgnoreCase("start")) {
+            Game game = null;
+
             if (args.length == 1) {
-                commandSender.sendMessage(Util.color("&cEspecifique o nome da arena."));
-                return true;
+                if(commandSender instanceof  Player && GamePlayer.get(((Player) commandSender).getUniqueId()).isInGame()) {
+                    game = GamePlayer.get(((Player) commandSender).getUniqueId()).getGame();
+                }else{
+                    commandSender.sendMessage(Util.color("&cEspecifique o nome da arena."));
+                    return true;
+                }
             }
 
-            if(Defensor.get().getGameManager().doesMapExists(args[1])) {
-                Game game = Defensor.get().getGameManager().getGameFromName(args[1]);
-                if(game.getState() == Enums.GameState.PRE_GAME || game.getState() == Enums.GameState.STARTING) {
-                    commandSender.sendMessage(Util.color("&aPartida iniciada."));
-                    game.start();
+            if(game == null) {
+                if (!Defensor.get().getGameManager().doesMapExists(args[1])) {
+                    commandSender.sendMessage(Util.color("&cErro: Arena inválida."));
+                    return true;
                 }
-            }else{
-                commandSender.sendMessage(Util.color("&cErro: Arena inválida."));
+                game = Defensor.get().getGameManager().getGameFromName(args[1]);
+            }
+            if(game.getState() == Enums.GameState.PRE_GAME || game.getState() == Enums.GameState.STARTING) {
+                commandSender.sendMessage(Util.color("&aPartida iniciada."));
+                game.start();
+            }
+
+        }else if(args[0].equalsIgnoreCase("stop")) {
+            Game game = null;
+
+            if (args.length == 1) {
+                if (commandSender instanceof Player && GamePlayer.get(((Player) commandSender).getUniqueId()).isInGame()) {
+                    game = GamePlayer.get(((Player) commandSender).getUniqueId()).getGame();
+                } else {
+                    commandSender.sendMessage(Util.color("&cEspecifique o nome da arena."));
+                    return true;
+                }
+            }
+
+            if (game == null) {
+                if (!Defensor.get().getGameManager().doesMapExists(args[1])) {
+                    commandSender.sendMessage(Util.color("&cErro: Arena inválida."));
+                    return true;
+                }
+                game = Defensor.get().getGameManager().getGameFromName(args[1]);
+            }
+            if (game.getState() == Enums.GameState.IN_GAME || game.getState() == Enums.GameState.ENDING) {
+                commandSender.sendMessage(Util.color("&cPartida encerrada."));
+                game.shutdown(true, true);
             }
         }
         return false;

@@ -53,6 +53,7 @@
                             <artifactSet>
                                 <includes>
                                     <include>org.json.simple</include>
+                                    <include>de.slikey.effectlib</include>
                                 </includes>
                             </artifactSet>
                         </configuration>
@@ -109,9 +110,9 @@
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>me.gamercoder215</groupId>
-            <artifactId>mobchip-base</artifactId>
-            <version>1.8.1-SNAPSHOT</version>
+            <groupId>com.elmakers.mine.bukkit</groupId>
+            <artifactId>EffectLib</artifactId>
+            <version>9.4</version>
             <scope>compile</scope>
         </dependency>
         <dependency>

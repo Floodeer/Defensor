@@ -1,5 +1,6 @@
 package com.floodeer.plugins.towerdefense.utils;
 
+import com.google.common.collect.Lists;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
@@ -120,5 +121,65 @@ public class Util {
         double x = Double.parseDouble(locationData[1]), y = Double.parseDouble(locationData[2]), z = Double.parseDouble(locationData[3]);
         float pitch = Float.parseFloat(locationData[4]), yaw = Float.parseFloat(locationData[5]);
         return new Location(world, x, y, z, pitch, yaw);
+    }
+
+    public static ArrayList<Location> getCircleAt(Location center, double radius, int amount) {
+        World world = center.getWorld();
+        double increment = 6.283185307179586D / amount;
+        ArrayList<Location> locations = new ArrayList<>();
+        for (int i = 0; i < amount; i++) {
+            double angle = i * increment;
+            double x = center.getX() + radius * Math.cos(angle);
+            double z = center.getZ() + radius * Math.sin(angle);
+            locations.add(new Location(world, x, center.getY(), z));
+        }
+        return locations;
+    }
+
+    public static ArrayList<Location> getCircleReverse(Location center, double radius, int amount) {
+        World world = center.getWorld();
+        double increment = 6.283185307179586D / amount;
+        ArrayList<Location> locations = new ArrayList<>();
+        for (int i = 0; i < amount; i++) {
+            double angle = i * increment;
+            double x = center.getX() - radius * Math.cos(angle);
+            double z = center.getZ() - radius * Math.sin(angle);
+            locations.add(new Location(world, x, center.getY(), z));
+        }
+        return locations;
+    }
+
+    public static List<Location> getCircleBlocks(Location loc, int range) {
+        List<Location> locations = Lists.newArrayList();
+
+        int x = loc.getBlockX() - range / 2;
+        int y = loc.getBlockY() - range / 2;
+        int z = loc.getBlockZ() - range / 2;
+        for (int m = x; m < x + range; m++) {
+            for (int n = y; n < y + range; n++) {
+                for (int i1 = z; i1 < z + range; i1++) {
+                    locations.add(loc.getWorld().getBlockAt(m, n, i1).getLocation());
+                }
+            }
+        }
+        return locations;
+    }
+
+    public static List<Location> getCircle(Location loc, double angle, int range) {
+        ArrayList<Location> localArrayList = new ArrayList<>();
+        double d1 = 6.283185307179586D / range;
+        for (int i = 0; i < range; i++) {
+            double d2 = i * d1;
+            double d3 = loc.getX() + angle * Math.cos(d2);
+            double d4 = loc.getZ() + angle * Math.sin(d2);
+
+            localArrayList.add(new Location(loc.getWorld(), d3, loc.getY(), d4));
+        }
+        return localArrayList;
+    }
+
+    public static Location getLocation(Location loc, double x, double y, double z) {
+        return new Location(loc.getWorld(), loc.getX() + x,
+                loc.getY() + y, loc.getZ() + z);
     }
 }

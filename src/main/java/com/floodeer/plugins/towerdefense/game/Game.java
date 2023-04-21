@@ -4,6 +4,8 @@ import com.floodeer.plugins.towerdefense.Defensor;
 import com.floodeer.plugins.towerdefense.database.data.GamePlayer;
 import com.floodeer.plugins.towerdefense.game.mechanics.Enemy;
 import com.floodeer.plugins.towerdefense.game.towers.Tower;
+import com.floodeer.plugins.towerdefense.utils.MathUtils;
+import com.floodeer.plugins.towerdefense.utils.Runner;
 import com.floodeer.plugins.towerdefense.utils.TimeUtils;
 import com.floodeer.plugins.towerdefense.utils.Util;
 import com.floodeer.plugins.towerdefense.utils.update.UpdateEvent;
@@ -14,6 +16,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.GameMode;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -67,12 +70,31 @@ public class Game implements Listener {
 
     public void addPlayer(GamePlayer gp) {
         gp.setGame(this);
-        gp.getPlayer().teleport(getArena().getLocation(GameArena.LocationType.LOBBY.toString()));
         getPlayers().put(gp, 3000D);
+        gp.getPlayer().teleport(getArena().getLocation(GameArena.LocationType.LOBBY.toString()));
+
+        Runner.make(Defensor.get()).delay(5).run(() -> {
+            gp.clearInventory(true);
+            gp.getPlayer().setGameMode(GameMode.ADVENTURE);
+        });
     }
 
     public void removePlayer(GamePlayer gp, boolean force, boolean leave) {
+        gp.clearInventory(false);
+        gp.restoreInventory();
+
         gp.setGame(null);
+        gp.setSpectator(false);
+        gp.getPlayer().setGameMode(GameMode.SURVIVAL);
+        gp.getPlayer().setAllowFlight(false);
+        gp.getPlayer().setFlying(false);
+
+        if(!force && getState() == Enums.GameState.IN_GAME && !gp.isSpectator()) {
+            gp.setGamesPlayed(gp.getGamesPlayed()+1);
+        }
+
+        getPlayers().remove(gp);
+        GameScoreboard.removeScore(gp.getPlayer());
     }
 
     public void start() {
@@ -203,16 +225,39 @@ public class Game implements Listener {
     }
 
     public void endGame(boolean winner) {
+        getPlayers().keySet().forEach(cur -> {
+            cur.setWins(cur.getWins() + 1);
+            cur.addMoney(getDifficulty().getRewardedCoins());
 
+            cur.msg(ChatColor.STRIKETHROUGH + "-------------------------");
+            cur.msg(" ");
+            cur.msg(winner ? "&a&lVitória!" : "&c&lDerrota");
+            cur.msg(" ");
+            cur.msg("&eRodadas: &b" + getCurrentWave());
+            cur.msg("&eRecompensa: &b" + (winner ? getDifficulty().getRewardedCoins() : getDifficulty().getRewardedCoins()/2));
+            cur.msg(" ");
+            cur.msg(ChatColor.STRIKETHROUGH + "----------------------------------");
+        });
+
+        Runner.make(Defensor.get()).delay(200).run(() -> shutdown(false, true));
     }
 
     public void shutdown(boolean force, boolean recreate) {
+        getPlayers().keySet().forEach(cur -> {
+            if(force) {
+                cur.msg("&cA partida foi encerrada por um administrador.");
+            }
+            removePlayer(cur, force, false);
+        });
 
+        Runner.make(Defensor.get()).delay(25).run(() -> restore(recreate));
     }
 
-    public void restore(boolean recreate) {
+    private void restore(boolean recreate) {
         Defensor.get().getMechanicsManager().stop(this);
-        Defensor.get().getGameManager().recreateGame(this);
+
+        if(recreate)
+            Defensor.get().getGameManager().recreateGame(this);
     }
 
     private void updateScoreboard() {

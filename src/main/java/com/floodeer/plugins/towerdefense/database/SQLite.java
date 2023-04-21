@@ -17,7 +17,7 @@ public class SQLite implements Database {
     public SQLite() throws ClassNotFoundException, SQLException {
         try {
             pool = Executors.newCachedThreadPool();
-            connection = new AtomicReference<Connection>();
+            connection = new AtomicReference<>();
             Class.forName("org.sqlite.JDBC");
             connect();
         } catch (SQLException ex) {
@@ -51,10 +51,7 @@ public class SQLite implements Database {
             if (connection.get() != null && !connection.get().isClosed()) {
                 connection.get().close();
             }
-
-        } catch (SQLException ignored) {
-
-        }
+        } catch (SQLException ignored) {}
         connection.set(null);
     }
 
@@ -81,18 +78,19 @@ public class SQLite implements Database {
     }
 
     @Override
-    public void createTables() throws IOException, SQLException {
+    public void createTables() throws SQLException {
         try (Statement statement = getConnection().get().createStatement()) {
 
             String query = "CREATE TABLE IF NOT EXISTS `defensor_player` ( " +
-                    "`player_id` INTeger PRIMARY KEY AUTOINCREMENT, " +
+                    "`player_id` INT PRIMARY KEY AUTOINCREMENT, " +
                     "`uuid` VARCHAR(255) NOT NULL UNIQUE, " +
                     "`playername` VARCHAR(60) NOT NULL, " +
                     "`wins` INT NOT NULL DEFAULT 0, " +
                     "`losses` INT NOT NULL DEFAULT 0, " +
                     "`games_played` INT NOT NULL DEFAULT 0, " +
                     "`wave_record` INT NOT NULL DEFAULT 0, " +
-                    "`damageCaused` DOUBLE NOT NULL DEFAULT 0, " +
+                    "`kills` INT NOT NULL DEFAULT 0, " +
+                    "`damage_caused` DOUBLE NOT NULL DEFAULT 0, " +
                     "`balance` INT NOT NULL DEFAULT 0, " +
                     "`exp` INT NOT NULL DEFAULT 0, " +
                     "`rank` VARCHAR(60) NOT NULL DEFAULT 'Level-1', " +
@@ -138,7 +136,6 @@ public class SQLite implements Database {
             String query = "ALTER TABLE " + "defensor_player" + " ADD COLUMN " + value;
             statement.execute(query);
             connection.commit();
-
         } finally {
             connection.setAutoCommit(true);
             if (statement != null) {
@@ -146,5 +143,4 @@ public class SQLite implements Database {
             }
         }
     }
-
 }

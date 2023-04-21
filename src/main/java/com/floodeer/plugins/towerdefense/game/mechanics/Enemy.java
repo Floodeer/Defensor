@@ -3,12 +3,14 @@ package com.floodeer.plugins.towerdefense.game.mechanics;
 import com.floodeer.plugins.towerdefense.Defensor;
 import com.floodeer.plugins.towerdefense.game.Enums;
 import com.floodeer.plugins.towerdefense.game.Game;
+import com.floodeer.plugins.towerdefense.utils.ItemFactory;
 import com.floodeer.plugins.towerdefense.utils.Util;
 import lombok.Getter;
 import lombok.Setter;
 
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
+import org.bukkit.Material;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.entity.*;
@@ -29,10 +31,12 @@ public class Enemy {
     @Getter @Setter private int killExp;
     @Getter @Setter private int killCoins;
     @Getter @Setter private int waveUnlocked;
-    @Getter private int cost;
+    @Getter private final int cost;
 
     @Getter private final EntityType entity;
-    @Getter private EntityEquipment entityEquipment;
+    @Getter private final EntityEquipment entityEquipment;
+
+
 
     public Enemy(FileConfiguration configFile, String name, boolean boss) {
         this.name = name;
@@ -47,7 +51,12 @@ public class Enemy {
         killExp = configFile.getInt(configPath + "Exp-Per-Kill");
         killCoins = configFile.getInt(configPath + "Coins-Per-Kill");
 
-        this.speed = 0.64D;
+        entityEquipment = new EntityEquipment(new ItemStack[]{
+                ItemFactory.parse(configFile.getString(configPath + "Helmet")),
+                ItemFactory.parse(configFile.getString(configPath + "Chestplate")),
+                ItemFactory.parse(configFile.getString(configPath + "Leggings")),
+                ItemFactory.parse(configFile.getString(configPath + "Boots")),
+                ItemFactory.parse(configFile.getString(configPath + "Hand"))});
     }
 
     public AliveEnemy spawn(Location location, Enums.Difficulty difficulty) {
@@ -65,8 +74,8 @@ public class Enemy {
         }
 
         mob.setCollidable(false);
-        // mob.getEquipment().setItemInMainHand(entityEquipment.getItemOnHand());
-        // mob.getEquipment().setArmorContents(entityEquipment.toArray());
+        mob.getEquipment().setItemInMainHand(entityEquipment.getItemOnHand() == null ? ItemFactory.create(Material.AIR) : entityEquipment.getHandItem());
+        mob.getEquipment().setArmorContents(entityEquipment.getArmor());
         
         mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(this.getHealth() * difficulty.getHealthModifier());
         mob.setHealth(mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());
@@ -111,18 +120,27 @@ public class Enemy {
 
             this.entity = entity;
         }
-
-        public void nextIndex() {
-            ++pathIndex;
-        }
     }
 
 
-    @Getter @Setter
     private static class EntityEquipment {
-        private ItemStack helmet, chestplate, leggings, boots, itemOnHand;
 
-        ItemStack[] toArray() {
+        @Getter
+        private final ItemStack helmet, chestplate, leggings, boots, itemOnHand;
+
+        public EntityEquipment(ItemStack[] items) {
+                helmet = items[0];
+                chestplate = items[1];
+                leggings = items[2];
+                boots = items[3];
+                itemOnHand = items[4];
+        }
+
+        ItemStack getHandItem() {
+            return itemOnHand;
+        }
+
+        ItemStack[] getArmor() {
             return new ItemStack[] {helmet, chestplate, leggings, boots};
         }
     }
