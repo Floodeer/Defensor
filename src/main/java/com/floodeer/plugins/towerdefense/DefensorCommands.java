@@ -145,7 +145,7 @@ public class DefensorCommands implements CommandExecutor {
             }
             Game game = Defensor.get().getGameManager().getGameFromName(name);
             game.getArena().setLocation(GameArena.LocationType.MOB_SPAWN, player.getLocation());
-            player.sendMessage(Util.color("&aLobby spawn configurado com sucesso!"));
+            player.sendMessage(Util.color("&aMob spawn configurado com sucesso!"));
         }else if(args[0].equalsIgnoreCase("addPath")) {
             if (!(commandSender instanceof Player))
                 return false;

@@ -9,8 +9,8 @@ Enemies:
     Wave-Unlocked: 1
     Speed: 0.25
     Equipment:
-      Helmet: 'LEATHER_HELMET : dye:red'
-      Chestplate: 'LEATHER_CHESTPLATE : dye:red'
-      Leggings: 'LEATHER_LEGGINGS : dye:red'
-      Boots: 'LEATHER_BOOTS : dye:red'
+      Helmet: 'LEATHER_HELMET : 1 : dye:red'
+      Chestplate: 'LEATHER_CHESTPLATE : 1 : dye:red'
+      Leggings: 'LEATHER_LEGGINGS : 1 : dye:red'
+      Boots: 'LEATHER_BOOTS : 1 : dye:red'
       Hand: 'AIR'

@@ -39,7 +39,7 @@ Difficulties:
                   '&c- Inimigos aumentam rapidamente e recebem mais força',
                   '&a- Vida: 50', '&6- Rodada final: 25']
     material: 'IRON_SWORD'
-  EXPERIENTE:
+  ESPECIALISTA:
     health_modifier: 1.5
     coins-when-beat: 500
     final-wave: 30

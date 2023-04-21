@@ -1,6 +1,7 @@
 package com.floodeer.plugins.towerdefense.manager;
 
 
+import com.floodeer.plugins.towerdefense.Defensor;
 import com.floodeer.plugins.towerdefense.database.data.GamePlayer;
 import com.google.common.collect.Maps;
 import org.bukkit.Bukkit;
@@ -36,9 +37,11 @@ public class PlayerManager {
     }
 
     public void removePlayer(UUID uuid) {
-        if(getPlayer(uuid).isInGame())
-            getPlayer(uuid).getGame().removePlayer(getPlayer(uuid), false, true);
+        GamePlayer gp = getPlayer(uuid);
+        if(gp.isInGame())
+            gp.getGame().removePlayer(gp, false, true);
 
+        updateAsync(gp);
         onlinePlayers.remove(uuid);
     }
 
@@ -50,6 +53,44 @@ public class PlayerManager {
         return onlinePlayers.values().stream().filter(cur -> cur.getPlayer().equals(player)).findAny().orElse(null);
     }
 
+    public void shutdown() {
+        for(GamePlayer gp : getAll()) {
+            Defensor.get().getDataManager().updatePlayer(gp);
+        }
+        onlinePlayers.clear();
+    }
+
+    public void restart() {
+        for(GamePlayer gp : getAll()) {
+            Defensor.get().getDataManager().updatePlayer(gp);
+        }
+        onlinePlayers.clear();
+        for (Player player : Bukkit.getOnlinePlayers()) {
+            addPlayer(player.getUniqueId());
+        }
+    }
+
+    public void updateAll() {
+        for(GamePlayer gp : getAll()) {
+            Defensor.get().getDataManager().updatePlayer(gp);
+        }
+    }
+
+    public void updateAllAsync() {
+        for(GamePlayer gp : getAll()) {
+            Defensor.get().getDataManager().updatePlayerAsync(gp);
+        }
+    }
+
+    public void update(GamePlayer gp) {
+        Defensor.get().getDataManager().updatePlayer(gp);
+    }
+
+    public void updateAsync(GamePlayer gp) {
+        Defensor.get().getDataManager().updatePlayerAsync(gp);
+    }
+    
+    
     public GamePlayer getPlayer(String name) {
         for (GamePlayer gPlayer: onlinePlayers.values()) {
             if (gPlayer.getName().equals(name)) {

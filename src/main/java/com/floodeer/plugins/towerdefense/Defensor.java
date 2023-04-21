@@ -49,7 +49,6 @@ public final class Defensor extends JavaPlugin {
         if (!mapsFolder.exists())
             mapsFolder.mkdirs();
 
-
         this.playerManager = new PlayerManager();
         this.mechanicsManager = new GameMechanicsManager();
         this.gameManager = new GameManager();
@@ -82,6 +81,7 @@ public final class Defensor extends JavaPlugin {
     @Override
     public void onDisable() {
         gameManager.shutdownGames();
+        getPlayerManager().shutdown();
     }
 
     private boolean setupDatabase()  {

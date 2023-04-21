@@ -164,7 +164,7 @@ public class DataManager {
             ResultSet resultSet = null;
             @Override
             public void run() {
-                String query = "SELECT `balance` FROM `wizards_player` WHERE `" + (identifier instanceof UUID ? "uuid" : "playername") + "` = ? LIMIT 1;";
+                String query = "SELECT `balance` FROM `defensor_player` WHERE `" + (identifier instanceof UUID ? "uuid" : "playername") + "` = ? LIMIT 1;";
                 try {
                     preparedStatement = database.getConnection().get().prepareStatement(query);
                     preparedStatement.setString(1, identifier instanceof UUID ? identifier.toString() : ((String)identifier));

@@ -17,7 +17,7 @@ public class GameArena {
 
     @Getter private final String name;
 
-    @Getter private GameDataFile gameDataFile;
+    private GameDataFile gameDataFile;
     @Getter private File gameFolder;
 
     @Getter private final List<Location> path;
@@ -33,28 +33,36 @@ public class GameArena {
     }
 
     public void load() {
-        gameDataFile.getStringList("Locations.path").forEach(cur -> path.add(Util.getLocationFromString(cur)));
+        getGameDataFile().getStringList("Locations.path").forEach(cur -> path.add(Util.getLocationFromString(cur)));
     }
 
     public void addPath(Location l) {
-        if (!gameDataFile.contains("Locations.path"))
-            gameDataFile.createNewStringList("Locations.path", new ArrayList<>());
+        if (!getGameDataFile().contains("Locations.path"))
+            getGameDataFile().createNewStringList("Locations.path", new ArrayList<>());
 
-        List<String> way = gameDataFile.getStringList("Locations.path");
+        List<String> way = getGameDataFile().getStringList("Locations.path");
         way.add(Util.getStringFromLocation(l, true));
-        gameDataFile.set("Locations.path", way);
-        gameDataFile.save();
+        getGameDataFile().set("Locations.path", way);
+        getGameDataFile().save();
     }
+
+    public GameDataFile getGameDataFile() {
+        if(gameDataFile == null)
+            gameDataFile = GameDataYaml.getMap(this.name);
+
+        return gameDataFile;
+    }
+
 
 
     public void create(Enums.Difficulty difficulty) {
         gameDataFile = GameDataYaml.getMap(this.name);
-        gameDataFile.add("Name", this.name);
-        gameDataFile.add("Difficulty", difficulty.toString());
-        gameDataFile.add("Max-Health", difficulty.getPlayerHealth());
-        gameDataFile.add("Map.MinPlayers", 1);
-        gameDataFile.add("Map.MaxPlayers", 4);
-        gameDataFile.save();
+        getGameDataFile().add("Name", this.name);
+        getGameDataFile().add("Difficulty", difficulty.toString());
+        getGameDataFile().add("Max-Health", difficulty.getPlayerHealth());
+        getGameDataFile().add("Map.MinPlayers", 1);
+        getGameDataFile().add("Map.MaxPlayers", 4);
+        getGameDataFile().save();
 
         gameFolder = new File(Defensor.get().getDataFolder() + File.separator + "maps" + File.separator + name);
 
@@ -65,38 +73,38 @@ public class GameArena {
     }
 
     public Enums.Difficulty getDifficulty() {
-        return Enums.Difficulty.fromName(gameDataFile.getString("Difficulty"));
+        return Enums.Difficulty.fromName(getGameDataFile().getString("Difficulty"));
     }
 
 
     public void setMinPlayers(int x) {
-        gameDataFile.set("Map.MinPlayers", x);
-        gameDataFile.save();
+        getGameDataFile().set("Map.MinPlayers", x);
+        getGameDataFile().save();
     }
 
     public void setMaxPlayers(int x) {
-        gameDataFile.set("Map.MaxPlayers", x);
-        gameDataFile.save();
+        getGameDataFile().set("Map.MaxPlayers", x);
+        getGameDataFile().save();
     }
 
     public int getMinPlayers() {
-        return gameDataFile.getInteger("Map.MinPlayers");
+        return getGameDataFile().getInteger("Map.MinPlayers");
     }
 
     public int getMaxPlayers() {
-        return gameDataFile.getInteger("Map.MaxPlayers");
+        return getGameDataFile().getInteger("Map.MaxPlayers");
     }
 
     public Location getLocation(String type) {
         double x, z, y;
         float yaw, pitch;
         String world;
-        world = gameDataFile.getString("Locations." + type + ".world");
-        x = gameDataFile.getDouble("Locations." + type + ".x");
-        y = gameDataFile.getDouble("Locations." + type + ".y");
-        z =	gameDataFile.getDouble("Locations." + type + ".z");
-        yaw = (float) gameDataFile.getDouble("Locations." + type + ".yaw");
-        pitch = (float) gameDataFile.getDouble("Locations." + type + ".pitch");
+        world = getGameDataFile().getString("Locations." + type + ".world");
+        x = getGameDataFile().getDouble("Locations." + type + ".x");
+        y = getGameDataFile().getDouble("Locations." + type + ".y");
+        z =	getGameDataFile().getDouble("Locations." + type + ".z");
+        yaw = (float) getGameDataFile().getDouble("Locations." + type + ".yaw");
+        pitch = (float) getGameDataFile().getDouble("Locations." + type + ".pitch");
 
         if(world == null || world.isEmpty() || Bukkit.getWorld(world) == null)
             return null;
@@ -104,13 +112,13 @@ public class GameArena {
     }
 
     public void setLocation(LocationType type, Location loc) {
-        gameDataFile.set("Locations." + LocationType.toString(type) + ".world", loc.getWorld().getName());
-        gameDataFile.set("Locations." + LocationType.toString(type) + ".x", loc.getX());
-        gameDataFile.set("Locations." + LocationType.toString(type) + ".y", loc.getY());
-        gameDataFile.set("Locations." + LocationType.toString(type) + ".z", loc.getZ());
-        gameDataFile.set("Locations." + LocationType.toString(type) + ".pitch", loc.getPitch());
-        gameDataFile.set("Locations." + LocationType.toString(type) + ".yaw", loc.getYaw());
-        gameDataFile.save();
+        getGameDataFile().set("Locations." + LocationType.toString(type) + ".world", loc.getWorld().getName());
+        getGameDataFile().set("Locations." + LocationType.toString(type) + ".x", loc.getX());
+        getGameDataFile().set("Locations." + LocationType.toString(type) + ".y", loc.getY());
+        getGameDataFile().set("Locations." + LocationType.toString(type) + ".z", loc.getZ());
+        getGameDataFile().set("Locations." + LocationType.toString(type) + ".pitch", loc.getPitch());
+        getGameDataFile().set("Locations." + LocationType.toString(type) + ".yaw", loc.getYaw());
+        getGameDataFile().save();
     }
 
     public boolean doesMapExists() {

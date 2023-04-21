@@ -94,7 +94,7 @@ public class ItemFactory {
 
     public static ItemStack parse(String config) {
         ItemStack stack = null;
-        if (config == null || config.isEmpty()) {
+        if (config == null || config.isEmpty() || config.equalsIgnoreCase("AIR")) {
             return create(Material.AIR);
         }
 
@@ -103,7 +103,7 @@ public class ItemFactory {
             String[] parts = config.split(" : ");
             String name = parts[0].split(":")[0];
             int amount = Integer.parseInt(parts[1]);
-            boolean weapon = false;
+
             if (name.isEmpty()) {
                 return ItemFactory.create(Material.AIR);
             }
@@ -142,8 +142,6 @@ public class ItemFactory {
 
                 } else if (in.equals("unbreakable")) {
                     stack.getItemMeta().setUnbreakable(true);
-                } else if (in.equals("weapon")) {
-                    weapon = true;
                 } else if (in.equalsIgnoreCase("ModelData")) {
                     addCustomModel(stack, Integer.parseInt(parts[i].split(":")[1]));
                 } else if (in.equalsIgnoreCase("ItemFlag")) {

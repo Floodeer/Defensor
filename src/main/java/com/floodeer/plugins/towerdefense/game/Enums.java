@@ -98,11 +98,11 @@ public class Enums {
                 case DIFICIL:
                     return "&cDifícil";
                 case ESPECIAL:
-                    return "&9Especialista";
+                    return "&eEspecial";
                 case PESADELO:
                     return "&e&lPesadelo";
                 case ESPECIALISTA:
-                    return "&eEspecial";
+                    return "&9Especialista";
             }
             return toString();
         }

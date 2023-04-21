@@ -36,8 +36,6 @@ public class Enemy {
     @Getter private final EntityType entity;
     @Getter private final EntityEquipment entityEquipment;
 
-
-
     public Enemy(FileConfiguration configFile, String name, boolean boss) {
         this.name = name;
 
@@ -47,16 +45,16 @@ public class Enemy {
         cost = configFile.getInt(configPath + "Cost");
         health = configFile.getInt(configPath + "Health");
         damage = configFile.getInt(configPath + "Damage");
-        speed = configFile.getInt(configPath + "Speed");
+        speed = configFile.getDouble(configPath + "Speed");
         killExp = configFile.getInt(configPath + "Exp-Per-Kill");
         killCoins = configFile.getInt(configPath + "Coins-Per-Kill");
 
         entityEquipment = new EntityEquipment(new ItemStack[]{
-                ItemFactory.parse(configFile.getString(configPath + "Helmet")),
-                ItemFactory.parse(configFile.getString(configPath + "Chestplate")),
-                ItemFactory.parse(configFile.getString(configPath + "Leggings")),
-                ItemFactory.parse(configFile.getString(configPath + "Boots")),
-                ItemFactory.parse(configFile.getString(configPath + "Hand"))});
+                ItemFactory.parse(configFile.getString(configPath + "Equipment.Helmet")),
+                ItemFactory.parse(configFile.getString(configPath + "Equipment.Chestplate")),
+                ItemFactory.parse(configFile.getString(configPath + "Equipment.Leggings")),
+                ItemFactory.parse(configFile.getString(configPath + "Equipment.Boots")),
+                ItemFactory.parse(configFile.getString(configPath + "Equipment.Hand"))});
     }
 
     public AliveEnemy spawn(Location location, Enums.Difficulty difficulty) {
@@ -75,7 +73,10 @@ public class Enemy {
 
         mob.setCollidable(false);
         mob.getEquipment().setItemInMainHand(entityEquipment.getItemOnHand() == null ? ItemFactory.create(Material.AIR) : entityEquipment.getHandItem());
-        mob.getEquipment().setArmorContents(entityEquipment.getArmor());
+        mob.getEquipment().setHelmet(getEntityEquipment().getHelmet());
+        mob.getEquipment().setChestplate(getEntityEquipment().getChestplate());
+        mob.getEquipment().setLeggings(getEntityEquipment().getLeggings());
+        mob.getEquipment().setBoots(getEntityEquipment().getBoots());
         
         mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).setBaseValue(this.getHealth() * difficulty.getHealthModifier());
         mob.setHealth(mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue());

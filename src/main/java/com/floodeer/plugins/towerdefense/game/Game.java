@@ -4,7 +4,6 @@ import com.floodeer.plugins.towerdefense.Defensor;
 import com.floodeer.plugins.towerdefense.database.data.GamePlayer;
 import com.floodeer.plugins.towerdefense.game.mechanics.Enemy;
 import com.floodeer.plugins.towerdefense.game.towers.Tower;
-import com.floodeer.plugins.towerdefense.utils.MathUtils;
 import com.floodeer.plugins.towerdefense.utils.Runner;
 import com.floodeer.plugins.towerdefense.utils.TimeUtils;
 import com.floodeer.plugins.towerdefense.utils.Util;
@@ -14,9 +13,12 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import lombok.Getter;
 import lombok.Setter;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.title.Title;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.GameMode;
+import org.bukkit.Sound;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 
@@ -93,7 +95,9 @@ public class Game implements Listener {
             gp.setGamesPlayed(gp.getGamesPlayed()+1);
         }
 
-        getPlayers().remove(gp);
+        if(!force) {
+            getPlayers().remove(gp);
+        }
         GameScoreboard.removeScore(gp.getPlayer());
     }
 
@@ -167,51 +171,39 @@ public class Game implements Listener {
                         });
                     }
                 });
+                spawnEnemies();
             }
-            spawnEnemies();
         }, 5 * 20); //TODO testing
     }
 
     public void spawnEnemies() {
+        int sum = this.summon.values().stream().mapToInt(Integer::intValue).sum();
 
-        int totalEnemies = getEnemies().size();
-
-        if (totalEnemies >= this.maxEnemies) {
-            return;
-        }
-
-        List<Enemy> availableEnemies = new ArrayList<>((Defensor.get().getMechanicsManager().getEnemies()).values());
-
-        if (getDifficulty() == Enums.Difficulty.PESADELO)
-            Collections.shuffle(availableEnemies);
-        else
-            Collections.reverse(availableEnemies);
-
-        int maxEnemies = (int) (this.maxEnemies * 0.25D);
-
-        while (totalEnemies < this.maxEnemies) {
-            boolean enemySummoned = false;
-
-            for (Enemy enemy : availableEnemies) {
-                if (this.enemyCoins >= enemy.getCost() && this.currentWave >= enemy.getWaveUnlocked()) {
-                    this.enemyCoins -= enemy.getCost();
-                    this.summon.put(enemy, this.summon.containsKey(enemy) ? this.summon.get(enemy) + 1 : 1);
-                    enemySummoned = true;
-                    break;
+        if (sum < this.maxEnemies) {
+            List<Enemy> enemies = new ArrayList<>((Defensor.get().getMechanicsManager().getEnemies()).values());
+            Collections.reverse(enemies);
+            int maxToSummon = (int)(this.maxEnemies * 0.25D);
+            while (sum < this.maxEnemies) {
+                for (Enemy enemy : enemies) {
+                    if (this.enemyCoins >= enemy.getCost() && this.currentWave >= enemy.getWaveUnlocked()) {
+                        this.enemyCoins -= enemy.getCost();
+                        this.summon.put(enemy, this.summon.containsKey(enemy) ? this.summon.get(enemy) + 1 : 1);
+                        break;
+                    }
+                }
+                sum++;
+                for (Iterator<Map.Entry<Enemy, Integer>> it = this.summon.entrySet().iterator(); it.hasNext(); ) {
+                    Map.Entry<Enemy, Integer> entry = it.next();
+                    if (entry.getValue() >= maxToSummon && entry.getKey().getCost() > 0) {
+                        it.remove();
+                        enemies.remove(entry.getKey());
+                    }
                 }
             }
-
-            if (!enemySummoned) {
-                break;
-            }
-
-            totalEnemies++;
-
-            getSummon().entrySet().removeIf(entry -> entry.getValue() >= maxEnemies && entry.getKey().getCost() > 0);
-            availableEnemies.removeAll(getSummon().keySet());
         }
-
-        getSummon().keySet().forEach(cur -> Defensor.get().getMechanicsManager().spawn(getGame(), cur, summon.get(cur)));
+        for (Map.Entry<Enemy, Integer> entry : this.summon.entrySet()) {
+            Defensor.get().getMechanicsManager().spawn(this, entry.getKey(), entry.getValue());
+        }
         this.summon.clear();
     }
 
@@ -222,9 +214,16 @@ public class Game implements Listener {
                 endGame(false);
             }
         }
+
+        playSound(Sound.ENTITY_ZOMBIE_BREAK_WOODEN_DOOR, 1F, 0.5F);
     }
 
     public void endGame(boolean winner) {
+        setState(Enums.GameState.ENDING);
+        getEnemies().forEach(entity -> entity.getEntity().remove());
+        getEnemies().clear();
+        summon.clear();
+
         getPlayers().keySet().forEach(cur -> {
             cur.setWins(cur.getWins() + 1);
             cur.addMoney(getDifficulty().getRewardedCoins());
@@ -247,7 +246,7 @@ public class Game implements Listener {
             if(force) {
                 cur.msg("&cA partida foi encerrada por um administrador.");
             }
-            removePlayer(cur, force, false);
+            removePlayer(cur, true, false);
         });
 
         Runner.make(Defensor.get()).delay(25).run(() -> restore(recreate));
@@ -300,5 +299,17 @@ public class Game implements Listener {
 
     public boolean hasLivingEnemies() {
         return (getEnemies().size() > 0);
+    }
+
+    private void sendActionBar(String text) {
+        getPlayers().keySet().stream().map(GamePlayer::getPlayer).forEach(cur -> cur.sendActionBar(Component.text(text)));
+    }
+
+    private void sendTitle(String title, String subtitle) {
+        getPlayers().keySet().stream().map(GamePlayer::getPlayer).forEach(cur -> cur.showTitle(Title.title(Component.text(title), Component.text(subtitle))));
+    }
+
+    private void playSound(Sound sound, float volume, float pitch) {
+        getPlayers().keySet().stream().map(GamePlayer::getPlayer).forEach(cur -> cur.playSound(cur.getLocation(), sound, volume, pitch));
     }
 }
