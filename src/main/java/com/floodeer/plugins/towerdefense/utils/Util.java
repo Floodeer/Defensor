@@ -1,20 +1,29 @@
 package com.floodeer.plugins.towerdefense.utils;
 
 import com.google.common.collect.Lists;
+import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.Location;
-import org.bukkit.World;
+import org.bukkit.*;
+import org.bukkit.entity.Player;
 import org.json.simple.JSONObject;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class Util {
 
+    public static final String URL_REGEX = "^((https?|ftp)://|(www|ftp)\\.)?[a-z0-9-]+(\\.[a-z0-9-]+)+([/?].*)?$";
+
     private static String healthString = "";
+
+    public static boolean isURL(String str) {
+        Pattern p = Pattern.compile(URL_REGEX);
+        Matcher m = p.matcher(str);
+        return m.find();
+    }
 
     public static String color(String msg) {
         return ChatColor.translateAlternateColorCodes('&', msg);
@@ -65,8 +74,14 @@ public class Util {
         return build;
     }
 
-    public static void createFakeExplosion(Location loc, int amount, float size) {
-        //TODO remove EffectLib dependency
+    public static void createFakeExplosion(Location loc, int amount, float speed, boolean huge) {
+        loc.getWorld().spawnParticle(huge ? Particle.EXPLOSION_HUGE : Particle.EXPLOSION_NORMAL, loc, amount, 0, 0, 0, speed);
+        loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 2.5F, 1F);
+    }
+
+    public static void createFakeNormalExplosion(Location loc, int amount, float speed) {
+        loc.getWorld().spawnParticle(Particle.EXPLOSION_NORMAL, loc, amount, 0, 0, 0, speed);
+        loc.getWorld().playSound(loc, Sound.ENTITY_GENERIC_EXPLODE, 2.5F, 1F);
     }
 
     public static String saveLocation(Location location, boolean yawPitch) {
@@ -181,5 +196,30 @@ public class Util {
     public static Location getLocation(Location loc, double x, double y, double z) {
         return new Location(loc.getWorld(), loc.getX() + x,
                 loc.getY() + y, loc.getZ() + z);
+    }
+
+    public static void displayProgress(String prefix, double amount, String suffix, boolean progressDirectionSwap, Player... players) {
+        if (progressDirectionSwap)
+            amount = 1 - amount;
+
+        int bars = 24;
+        String progressBar = ChatColor.GREEN + "";
+        boolean colorChange = false;
+        for (int i = 0; i < bars; i++) {
+            if (!colorChange && (float) i / (float) bars >= amount) {
+                progressBar += ChatColor.RED;
+                colorChange = true;
+            }
+
+            progressBar += "▌";
+        }
+        sendActionBar((prefix == null ? "" : prefix + ChatColor.RESET + " ") + progressBar
+                + (suffix == null ? "" : ChatColor.RESET + " " + suffix), players);
+    }
+
+    public static void sendActionBar(String msg, Player... players) {
+        for(Player p : players) {
+            p.sendActionBar(Component.text(Util.color(msg)));
+        }
     }
 }

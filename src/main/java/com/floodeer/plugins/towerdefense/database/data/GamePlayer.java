@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
+import org.bukkit.Location;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.potion.PotionEffect;
@@ -118,22 +119,14 @@ public class GamePlayer {
 
     protected class PlayerInventory {
 
-        @Getter
-        private final ItemStack[] content;
-        @Getter
-        private final ItemStack[] armor;
-        @Getter
-        private final float exp;
-        @Getter
-        private final GameMode gameMode;
-        @Getter
-        private final int level;
-        @Getter
-        private final int foodLevel;
-        @Getter
-        private final Collection<PotionEffect> effects;
-        @Getter
-        private final Player p;
+        @Getter private final ItemStack[] content;
+        @Getter private final ItemStack[] armor;
+        @Getter private final float exp;
+        @Getter private final GameMode gameMode;
+        @Getter private final int level;
+        @Getter private final int foodLevel;
+        @Getter private final Collection<PotionEffect> effects;
+        @Getter private final Player p;
 
         public PlayerInventory(Player p) {
             this.p = p;

@@ -5,11 +5,10 @@ import com.floodeer.plugins.towerdefense.database.SQLite;
 import com.floodeer.plugins.towerdefense.game.Enums;
 import com.floodeer.plugins.towerdefense.listeners.EntityListener;
 import com.floodeer.plugins.towerdefense.listeners.PlayerListener;
-import com.floodeer.plugins.towerdefense.manager.DataManager;
-import com.floodeer.plugins.towerdefense.manager.GameManager;
-import com.floodeer.plugins.towerdefense.manager.GameMechanicsManager;
-import com.floodeer.plugins.towerdefense.manager.PlayerManager;
+import com.floodeer.plugins.towerdefense.manager.*;
 import com.floodeer.plugins.towerdefense.utils.ConfigOptions;
+import com.floodeer.plugins.towerdefense.utils.IconCore;
+import com.floodeer.plugins.towerdefense.utils.Items;
 import com.floodeer.plugins.towerdefense.utils.update.Updater;
 import lombok.Getter;
 import org.bukkit.configuration.InvalidConfigurationException;
@@ -29,6 +28,9 @@ public final class Defensor extends JavaPlugin {
     @Getter private ConfigOptions configOptions;
     @Getter private Database database;
     @Getter private DataManager dataManager;
+    @Getter private EnergyManager energyManager;
+    @Getter private IconCore iconCore;
+    @Getter private Items items;
 
     public static Defensor get() {
         return main;
@@ -38,8 +40,7 @@ public final class Defensor extends JavaPlugin {
     public void onEnable() {
         main = this;
 
-        if(!setupDatabase())
-            return;
+        setupDatabase();
 
         File skins = new File(this.getDataFolder() + File.separator + "skins");
         if(!skins.exists())
@@ -49,12 +50,14 @@ public final class Defensor extends JavaPlugin {
         if (!mapsFolder.exists())
             mapsFolder.mkdirs();
 
+        getServer().getScheduler().runTaskTimer(this, new Updater(this), 20, 1);
+
         this.playerManager = new PlayerManager();
         this.mechanicsManager = new GameMechanicsManager();
         this.gameManager = new GameManager();
-
-        getServer().getScheduler().runTaskTimer(this, new Updater(this), 20, 1);
-
+        this.energyManager = new EnergyManager();
+        this.iconCore = new IconCore();
+        this.items = new Items();
         DefensorCommands commands = new DefensorCommands();
         getCommand("defensor").setExecutor(commands);
         getCommand("td").setExecutor(commands);
@@ -62,6 +65,7 @@ public final class Defensor extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
         getServer().getPluginManager().registerEvents(new EntityListener(), this);
         getServer().getPluginManager().registerEvents(mechanicsManager, this);
+        getServer().getPluginManager().registerEvents(iconCore, this);
 
         configOptions = new ConfigOptions(new File(getDataFolder(), "options.yml"));
         try {
@@ -85,14 +89,12 @@ public final class Defensor extends JavaPlugin {
     }
 
     private boolean setupDatabase()  {
-        if(database instanceof SQLite) {
-            try {
-                database = new SQLite();
-                database.createTables();
-            } catch (ClassNotFoundException | IOException | SQLException  e) {
-                e.printStackTrace();
-                return false;
-            }
+        try {
+            database = new SQLite();
+            database.createTables();
+        } catch (ClassNotFoundException | IOException | SQLException  e) {
+            e.printStackTrace();
+            return false;
         }
 
         dataManager = new DataManager();

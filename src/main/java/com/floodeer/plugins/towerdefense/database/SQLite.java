@@ -82,7 +82,7 @@ public class SQLite implements Database {
         try (Statement statement = getConnection().get().createStatement()) {
 
             String query = "CREATE TABLE IF NOT EXISTS `defensor_player` ( " +
-                    "`player_id` INT PRIMARY KEY AUTOINCREMENT, " +
+                    "`player_id` INTEGER PRIMARY KEY AUTOINCREMENT, " +
                     "`uuid` VARCHAR(255) NOT NULL UNIQUE, " +
                     "`playername` VARCHAR(60) NOT NULL, " +
                     "`wins` INT NOT NULL DEFAULT 0, " +

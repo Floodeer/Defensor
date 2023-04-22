@@ -18,6 +18,7 @@ public class GameArena {
     @Getter private final String name;
 
     private GameDataFile gameDataFile;
+
     @Getter private File gameFolder;
 
     @Getter private final List<Location> path;

@@ -1,0 +1,34 @@
+Towers:
+  test1:
+    Display-Name: "&e&lTest1"
+    Cost: 50
+    Damage: 15
+    Attack-Speed: 10
+    Range: 10
+    Lore:
+      - '&b&m----------'
+      - '&fPreço: &b50'
+      - '&fDano: &b15'
+      - '&fVelocidade: &b10'
+      - '&fAlcance: &b10'
+      - '&fSkills: &cBurn&f, &cStrike'
+      - '&fUltimate: &7Static Blast'
+      - '&b&m----------'
+      - ' '
+      - '&bTorre test'
+      - ' '
+    Skills:
+      - BURN
+      - STRIKE
+    Ultimate: 'Static Blast'
+    Upgrades:
+      Damage:
+        - '25:40'
+        - '35:45'
+        - '45:50'
+      Range:
+        - '10:20'
+        - '12:25'
+        - '15:30'
+    Skin: 'Touyama'
+    Item: 'STONE_SWORD : 1'

@@ -75,7 +75,7 @@ public class DefensorCommands implements CommandExecutor {
 
             Game game = Defensor.get().getGameManager().getGameFromName(args[1]);
             if (game.getState() == Enums.GameState.IN_GAME) {
-                game.shutdown(true, true);
+                game.shutdown(true);
             }
             Runner.make(Defensor.get()).delay(20).run(() -> {
                 game.setState(Enums.GameState.RESTORING);
@@ -262,7 +262,7 @@ public class DefensorCommands implements CommandExecutor {
             }
             if (game.getState() == Enums.GameState.IN_GAME || game.getState() == Enums.GameState.ENDING) {
                 commandSender.sendMessage(Util.color("&cPartida encerrada."));
-                game.shutdown(true, true);
+                game.shutdown(true);
             }
         }
         return false;

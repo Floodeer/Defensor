@@ -1,29 +1,41 @@
 package com.floodeer.plugins.towerdefense.utils;
 
 import com.google.common.collect.Lists;
-import org.bukkit.ChatColor;
-import org.bukkit.Color;
-import org.bukkit.Material;
+import org.bukkit.*;
 import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.ItemFlag;
 import org.bukkit.inventory.ItemStack;
-import org.bukkit.inventory.meta.Damageable;
-import org.bukkit.inventory.meta.ItemMeta;
-import org.bukkit.inventory.meta.LeatherArmorMeta;
-import org.bukkit.inventory.meta.PotionMeta;
+import org.bukkit.inventory.meta.*;
 import org.bukkit.potion.PotionData;
 import org.bukkit.potion.PotionType;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class ItemFactory {
 
+    public static boolean isMat(ItemStack item, Material mat) {
+        if (item == null) {
+            return false;
+        }
+        return item.getType() == mat;
+    }
+    
     public static ItemStack create(Material material, String name) {
         ItemStack item = new ItemStack(material, 1);
         ItemMeta meta = item.getItemMeta();
         meta.setDisplayName(name);
+        item.setItemMeta(meta);
+        return item;
+    }
+
+    public static ItemStack create(Material material, String name, List<String> lore) {
+        ItemStack item = new ItemStack(material, 1);
+        ItemMeta meta = item.getItemMeta();
+        meta.setDisplayName(name);
+        meta.setLore(lore);
         item.setItemMeta(meta);
         return item;
     }
@@ -179,6 +191,20 @@ public class ItemFactory {
 
     public static int getRGB(LeatherArmorMeta item) {
         return item.getColor().asRGB();
+    }
+
+    public static ItemStack getHead(UUID uuid) {
+        final OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
+        return getHead(player);
+    }
+
+    public static ItemStack getHead(OfflinePlayer player) {
+        final ItemStack head = new ItemStack(Material.PLAYER_HEAD);
+        final SkullMeta meta = (SkullMeta) head.getItemMeta();
+        assert meta != null;
+        meta.setOwningPlayer(player);
+        head.setItemMeta(meta);
+        return head;
     }
 
     public static String getItemColor(Color paramColor) {

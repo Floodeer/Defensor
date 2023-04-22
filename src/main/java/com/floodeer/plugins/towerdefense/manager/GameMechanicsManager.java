@@ -4,7 +4,7 @@ import com.floodeer.plugins.towerdefense.Defensor;
 import com.floodeer.plugins.towerdefense.game.Enums;
 import com.floodeer.plugins.towerdefense.game.Game;
 import com.floodeer.plugins.towerdefense.game.mechanics.Enemy;
-import com.floodeer.plugins.towerdefense.game.towers.Tower;
+import com.floodeer.plugins.towerdefense.game.mechanics.Tower;
 import com.floodeer.plugins.towerdefense.utils.update.UpdateEvent;
 import com.floodeer.plugins.towerdefense.utils.update.UpdateType;
 import com.google.common.collect.Lists;
@@ -43,6 +43,7 @@ public class GameMechanicsManager implements Listener {
         towers = Maps.newLinkedHashMap();
 
         loadEnemies();
+        loadTowers();
     }
 
     public void start(Game game) {
@@ -51,6 +52,9 @@ public class GameMechanicsManager implements Listener {
     }
 
     public void stop(Game game) {
+        if(!arenas.containsKey(game))
+            return;
+
         this.arenas.remove(game);
         for (Enemy.AliveEnemy aliveEnemy : this.arenasEntities.get(game)) {
             if (aliveEnemy.getEntity().isValid())
@@ -131,29 +135,50 @@ public class GameMechanicsManager implements Listener {
         }
         enemies.removeAll(remove);
     }
+
     private void loadEnemies() {
         this.enemies.clear();
         File file = new File(Defensor.get().getDataFolder(), "enemies.yml");
-        YamlConfiguration yamlConfiguration = YamlConfiguration.loadConfiguration(file);
-        if(yamlConfiguration.getConfigurationSection("Enemies") == null || yamlConfiguration.getConfigurationSection("Enemies").getKeys(false).isEmpty()) {
-            yamlConfiguration.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(Defensor.get().getResource("enemies.yml"))));
-            yamlConfiguration.options().copyDefaults(true);
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        if(config.getConfigurationSection("Enemies") == null || config.getConfigurationSection("Enemies").getKeys(false).isEmpty()) {
+            config.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(Defensor.get().getResource("enemies.yml"))));
+            config.options().copyDefaults(true);
 
             try {
-                yamlConfiguration.save(file);
+                config.save(file);
             } catch (IOException exception) {
                 exception.printStackTrace();
             }
         }
 
-        for (String enemyName : yamlConfiguration.getConfigurationSection("Enemies").getKeys(false)) {
-            this.enemies.put(enemyName.toLowerCase(), new Enemy(yamlConfiguration, enemyName, false));
+        for (String enemyName : config.getConfigurationSection("Enemies").getKeys(false)) {
+            this.enemies.put(enemyName.toLowerCase(), new Enemy(config, enemyName, false));
         }
 
-        if (yamlConfiguration.getConfigurationSection("Bosses") != null && !yamlConfiguration.getConfigurationSection("Bosses").getKeys(false).isEmpty()) {
-            for (String bossName : yamlConfiguration.getConfigurationSection("Bosses").getKeys(false)) {
-                this.bosses.put(bossName.toLowerCase(), new Enemy(yamlConfiguration, bossName, true));
+        if (config.getConfigurationSection("Bosses") != null && !config.getConfigurationSection("Bosses").getKeys(false).isEmpty()) {
+            for (String bossName : config.getConfigurationSection("Bosses").getKeys(false)) {
+                this.bosses.put(bossName.toLowerCase(), new Enemy(config, bossName, true));
             }
+        }
+    }
+
+    private void loadTowers() {
+        this.towers.clear();
+
+        File file = new File(Defensor.get().getDataFolder(), "towers.yml");
+        YamlConfiguration config = YamlConfiguration.loadConfiguration(file);
+        if(config.getConfigurationSection("Towers") == null || config.getConfigurationSection("Towers").getKeys(false).isEmpty()) {
+            config.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(Defensor.get().getResource("towers.yml"))));
+            config.options().copyDefaults(true);
+            try {
+                config.save(file);
+            } catch (IOException exception) {
+                exception.printStackTrace();
+            }
+        }
+
+        for (String towerName : config.getConfigurationSection("Towers").getKeys(false)) {
+            this.towers.put(towerName.toLowerCase(), new Tower(config, towerName));
         }
     }
 }

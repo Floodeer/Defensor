@@ -45,4 +45,38 @@ public class TimeUtils {
     public static boolean elapsed(long paramLong1, long paramLong2) {
         return System.currentTimeMillis() - paramLong1 > paramLong2;
     }
+
+    public static String toString(long paramLong) {
+        return convertString(paramLong, 1, TimeUnit.FIT);
+    }
+
+    public static String convertString(long paramLong, int paramInt, TimeUnit paramTimeUnit) {
+        if (paramLong == -1L) {
+            return "Permanente";
+        }
+        if (paramTimeUnit == TimeUnit.FIT) {
+            if (paramLong < 60000L) {
+                paramTimeUnit = TimeUnit.SECONDS;
+            } else if (paramLong < 3600000L) {
+                paramTimeUnit = TimeUnit.MINUTES;
+            } else if (paramLong < 86400000L) {
+                paramTimeUnit = TimeUnit.HOURS;
+            } else {
+                paramTimeUnit = TimeUnit.DAYS;
+            }
+        }
+        if (paramTimeUnit == TimeUnit.DAYS) {
+            return MathUtils.trim(paramInt, paramLong / 8.64E7D) + " dias";
+        }
+        if (paramTimeUnit == TimeUnit.HOURS) {
+            return MathUtils.trim(paramInt, paramLong / 3600000.0D) + " horas";
+        }
+        if (paramTimeUnit == TimeUnit.MINUTES) {
+            return MathUtils.trim(paramInt, paramLong / 60000.0D) + " minutos";
+        }
+        if (paramTimeUnit == TimeUnit.SECONDS) {
+            return MathUtils.trim(paramInt, paramLong / 1000.0D) + " segundos";
+        }
+        return MathUtils.trim(paramInt, paramLong) + " milissegundos";
+    }
 }

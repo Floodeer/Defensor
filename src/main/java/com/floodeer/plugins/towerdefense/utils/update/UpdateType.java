@@ -10,8 +10,6 @@ public enum UpdateType {
 
 	private final long time;
 	private long last;
-	private long TimeSpent;
-	private long TimeCount;
 
 	UpdateType(long paramLong) {
 		this.time = paramLong;
@@ -30,24 +28,7 @@ public enum UpdateType {
 		return time;
 	}
 
-	public void startTime() {
-		this.TimeCount = System.currentTimeMillis();
-	}
-
-	public void stopTime() {
-		this.TimeSpent += System.currentTimeMillis() - this.TimeCount;
-	}
-
-	public void printAndResetTime() {
-		System.out.println(name() + " in a second: " + this.TimeSpent);
-		this.TimeSpent = 0L;
-	}
-
-	protected boolean elapsed(long paramLong1, long paramLong2) {
+	private boolean elapsed(long paramLong1, long paramLong2) {
 		return System.currentTimeMillis() - paramLong1 > paramLong2;
-	}
-	
-	public static UpdateType getFromTime(long time) {
-		return Arrays.stream(UpdateType.values()).filter(value -> value.getTime() == time).findAny().get();
 	}
 }

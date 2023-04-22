@@ -3,7 +3,7 @@ package com.floodeer.plugins.towerdefense.game;
 import com.floodeer.plugins.towerdefense.Defensor;
 import com.floodeer.plugins.towerdefense.database.data.GamePlayer;
 import com.floodeer.plugins.towerdefense.game.mechanics.Enemy;
-import com.floodeer.plugins.towerdefense.game.towers.Tower;
+import com.floodeer.plugins.towerdefense.game.mechanics.Tower;
 import com.floodeer.plugins.towerdefense.utils.Runner;
 import com.floodeer.plugins.towerdefense.utils.TimeUtils;
 import com.floodeer.plugins.towerdefense.utils.Util;
@@ -15,11 +15,9 @@ import lombok.Getter;
 import lombok.Setter;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
-import org.bukkit.Bukkit;
-import org.bukkit.ChatColor;
-import org.bukkit.GameMode;
-import org.bukkit.Sound;
+import org.bukkit.*;
 import org.bukkit.event.EventHandler;
+import org.bukkit.event.HandlerList;
 import org.bukkit.event.Listener;
 
 import java.util.*;
@@ -99,11 +97,15 @@ public class Game implements Listener {
             getPlayers().remove(gp);
         }
         GameScoreboard.removeScore(gp.getPlayer());
+        gp.getPlayer().setScoreboard(Bukkit.getServer().getScoreboardManager().getMainScoreboard());
     }
 
     public void start() {
         setState(Enums.GameState.IN_GAME);
-        getPlayers().keySet().forEach(cur -> cur.getPlayer().teleport(getArena().getLocation(GameArena.LocationType.PLAYER_SPAWN.toString())));
+        getPlayers().keySet().forEach(cur -> {
+            cur.getPlayer().teleport(getArena().getLocation(GameArena.LocationType.PLAYER_SPAWN.toString()));
+            cur.getPlayer().getInventory().setItem(0, Defensor.get().getItems().getTowerMenuItem());
+        });
 
         setCurrentHealth(getDifficulty().playerHealth);
         setEnemyCoins(getDifficulty().enemyCoinsPerWave);
@@ -120,8 +122,12 @@ public class Game implements Listener {
 
             updateScoreboard();
 
-            if(getState() == Enums.GameState.IN_GAME)
+            if(getState() == Enums.GameState.IN_GAME) {
                 getTowers().forEach(Tower.PlacedTower::onTick);
+                if(getPlayers().size() == 0) {
+                    shutdown(true);
+                }
+            }
 
         } else if (event.getType() == UpdateType.SEC) { //ticks every 1000ms (20 ticks, 1s), Wave logic
             if(getState() != Enums.GameState.IN_GAME)
@@ -220,9 +226,8 @@ public class Game implements Listener {
 
     public void endGame(boolean winner) {
         setState(Enums.GameState.ENDING);
-        getEnemies().forEach(entity -> entity.getEntity().remove());
-        getEnemies().clear();
-        summon.clear();
+        Defensor.get().getMechanicsManager().stop(this);
+        getTowers().forEach(Tower.PlacedTower::delete);
 
         getPlayers().keySet().forEach(cur -> {
             cur.setWins(cur.getWins() + 1);
@@ -238,25 +243,33 @@ public class Game implements Listener {
             cur.msg(ChatColor.STRIKETHROUGH + "----------------------------------");
         });
 
-        Runner.make(Defensor.get()).delay(200).run(() -> shutdown(false, true));
+        resetArena(false);
     }
-
-    public void shutdown(boolean force, boolean recreate) {
-        getPlayers().keySet().forEach(cur -> {
-            if(force) {
-                cur.msg("&cA partida foi encerrada por um administrador.");
-            }
-            removePlayer(cur, true, false);
-        });
-
-        Runner.make(Defensor.get()).delay(25).run(() -> restore(recreate));
-    }
-
-    private void restore(boolean recreate) {
+    public void shutdown(boolean recreate) {
+        if(!getPlayers().isEmpty()) {
+            getPlayers().keySet().forEach(gp ->  {
+                removePlayer(gp, true, false);
+                if(getState() == Enums.GameState.IN_GAME) {
+                    broadcast("&cPartida cancelada!");
+                }
+            });
+        }
+        getPlayers().clear();
+        setState(Enums.GameState.RESTORING);
+        getTowers().forEach(Tower.PlacedTower::delete);
         Defensor.get().getMechanicsManager().stop(this);
+        HandlerList.unregisterAll(this);
 
         if(recreate)
             Defensor.get().getGameManager().recreateGame(this);
+    }
+
+    private void resetArena(boolean shutdown) {
+        Bukkit.getScheduler().runTaskLater(Defensor.get(), () -> {
+            getPlayers().keySet().forEach(gp -> removePlayer(gp, true, false));
+            if(!shutdown)
+                Runner.make(Defensor.get()).delay(35).run(() -> Defensor.get().getGameManager().recreateGame(this));
+        }, 10 * 20L);
     }
 
     private void updateScoreboard() {
@@ -298,7 +311,19 @@ public class Game implements Listener {
     }
 
     public boolean hasLivingEnemies() {
-        return (getEnemies().size() > 0);
+        return getEnemies() != null && (getEnemies().size() > 0);
+    }
+
+    public void addCoins(GamePlayer player, double coins) {
+        if(player == null) {
+            getPlayers().keySet().forEach(cur -> getPlayers().put(cur, getPlayers().get(cur) + coins));
+        }else{
+            getPlayers().put(player, getPlayers().get(player) + coins);
+        }
+    }
+
+    public void addTower(GamePlayer gp, Location paramLocation, Tower tower) {
+        this.towers.add(tower.summon(this, gp.getPlayer(), paramLocation));
     }
 
     private void sendActionBar(String text) {
@@ -311,5 +336,9 @@ public class Game implements Listener {
 
     private void playSound(Sound sound, float volume, float pitch) {
         getPlayers().keySet().stream().map(GamePlayer::getPlayer).forEach(cur -> cur.playSound(cur.getLocation(), sound, volume, pitch));
+    }
+
+    private void broadcast(String msg) {
+        getPlayers().keySet().forEach(cur -> cur.msg(msg));
     }
 }

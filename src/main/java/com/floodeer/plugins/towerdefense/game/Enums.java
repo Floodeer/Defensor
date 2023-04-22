@@ -40,8 +40,6 @@ public class Enums {
         });
     }
 
-
-
     public static YamlConfiguration getConfig() {
         return config;
     }
@@ -57,6 +55,26 @@ public class Enums {
         TowerEffects(String name) {
             this.name = name;
         }
+
+        public static TowerEffects fromString(String str) {
+            return Arrays.stream(TowerEffects.values()).filter(cur -> cur.toString().equalsIgnoreCase(str)).findAny().orElse(null);
+        }
+    }
+
+    public enum TowerUltimate {
+        STATIC_BLAST("Static Blast"),
+        BURNING_SOUL("Burning Soul"),
+        TORNADO("Tornado"),
+        ELECTRONIC_PULSE("Electronic Pulse"),
+        DROP_SHOCK("Drop Shock"),
+        FLAME_BREATH("Flame Breath"),
+        FREEZING_BREATH("Freezing Breath"),
+        IRON_PUNCH("IRON PUNCH");
+
+        String name;
+
+        TowerUltimate(String name) { this.name = name; }
+
     }
 
     public enum Difficulty {

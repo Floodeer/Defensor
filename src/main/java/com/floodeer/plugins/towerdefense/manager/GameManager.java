@@ -59,7 +59,7 @@ public class GameManager {
     public void deleteGame(String name)  {
         Game game = getGameFromName(name);
         if (game.getState() == Enums.GameState.IN_GAME)
-            game.shutdown(true, false);
+            game.shutdown(false);
 
         game.getArena().deleteArena();
         File dataDirectory = new File (Defensor.get().getDataFolder(), "maps");
@@ -85,7 +85,7 @@ public class GameManager {
     }
 
     public void shutdownGames() {
-        getGames().forEach(game -> game.shutdown(true, false));
+        getGames().forEach(game -> game.shutdown(false));
     }
 
     public Game getGameFromName(String name) {
