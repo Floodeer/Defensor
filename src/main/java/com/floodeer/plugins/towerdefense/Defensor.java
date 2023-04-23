@@ -3,6 +3,7 @@ package com.floodeer.plugins.towerdefense;
 import com.floodeer.plugins.towerdefense.database.Database;
 import com.floodeer.plugins.towerdefense.database.SQLite;
 import com.floodeer.plugins.towerdefense.game.Enums;
+import com.floodeer.plugins.towerdefense.listeners.UltimateListener;
 import com.floodeer.plugins.towerdefense.listeners.EntityListener;
 import com.floodeer.plugins.towerdefense.listeners.PlayerListener;
 import com.floodeer.plugins.towerdefense.manager.*;
@@ -64,6 +65,7 @@ public final class Defensor extends JavaPlugin {
 
         getServer().getPluginManager().registerEvents(new PlayerListener(), this);
         getServer().getPluginManager().registerEvents(new EntityListener(), this);
+        getServer().getPluginManager().registerEvents(new UltimateListener(), this);
         getServer().getPluginManager().registerEvents(mechanicsManager, this);
         getServer().getPluginManager().registerEvents(iconCore, this);
 

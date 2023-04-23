@@ -29,6 +29,10 @@ public class Util {
         return ChatColor.translateAlternateColorCodes('&', msg);
     }
 
+    public static int getPercent(int number) {
+        return (number / 100) * 100;
+    }
+
     public static List<String> colorList(List<String> list) {
         ArrayList<String> strings = new ArrayList<String>();
         for (String str : list) {

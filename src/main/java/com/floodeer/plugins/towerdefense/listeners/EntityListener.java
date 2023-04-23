@@ -3,6 +3,9 @@ package com.floodeer.plugins.towerdefense.listeners;
 import com.destroystokyo.paper.event.entity.EntityKnockbackByEntityEvent;
 import com.floodeer.plugins.towerdefense.Defensor;
 import com.floodeer.plugins.towerdefense.database.data.GamePlayer;
+import com.floodeer.plugins.towerdefense.event.TowerKillEnemyEvent;
+import com.floodeer.plugins.towerdefense.game.Game;
+import com.floodeer.plugins.towerdefense.game.mechanics.Enemy;
 import com.floodeer.plugins.towerdefense.utils.Util;
 import org.bukkit.attribute.Attribute;
 import org.bukkit.entity.LivingEntity;
@@ -57,7 +60,7 @@ public class EntityListener implements Listener {
         if(event.getEntity() instanceof LivingEntity && event.getEntity().hasMetadata("DefensorEntity")) {
             LivingEntity mob = (LivingEntity)event.getEntity();
             if(mob.getCustomName() != null) {
-                mob.setCustomName(Util.getHealth(mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue(), mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue()));
+                mob.setCustomName(Util.getHealth(mob.getHealth(), mob.getAttribute(Attribute.GENERIC_MAX_HEALTH).getBaseValue()));
             }
         }else if(event.getEntity() instanceof Player && GamePlayer.get(event.getEntity().getUniqueId()).isInGame()) {
             event.setCancelled(true);

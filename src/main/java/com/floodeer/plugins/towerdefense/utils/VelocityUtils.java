@@ -7,42 +7,61 @@ import org.bukkit.util.Vector;
 
 public class VelocityUtils {
 
-    public static Vector getTrajectory(Entity paramEntity1, Entity paramEntity2) {
-        return getTrajectory(paramEntity1.getLocation().toVector(), paramEntity2.getLocation().toVector());
+    public static Vector getRandomVector() {
+        double u = MathUtils.random.nextDouble();
+        double v = MathUtils.random.nextDouble();
+
+        double theta = u * 2 * Math.PI;
+        double phi = Math.acos(2 * v - 1);
+
+        double sinTheta = Math.sin(theta);
+        double cosTheta = Math.cos(theta);
+        double sinPhi = Math.sin(phi);
+        double cosPhi = Math.cos(phi);
+
+        double x = sinPhi * cosTheta;
+        double y = sinPhi * sinTheta;
+        double z = cosPhi;
+
+        return new Vector(x, y, z);
+    }
+    
+    public static Vector getTrajectory(Entity entity, Entity entity2) {
+        return getTrajectory(entity.getLocation().toVector(), entity2.getLocation().toVector());
     }
 
-    public static Vector getTrajectory(Entity paramEntity, Player paramPlayer) {
-        return getTrajectory(paramEntity.getLocation().toVector(), paramPlayer.getLocation().toVector());
+    public static Vector getTrajectory(Entity entity, Player player) {
+        return getTrajectory(entity.getLocation().toVector(), player.getLocation().toVector());
     }
 
-    public static Vector getTrajectory(Location paramLocation, Player paramPlayer) {
-        return getTrajectory(paramLocation.toVector(), paramPlayer.getLocation().toVector());
+    public static Vector getTrajectory(Location loc, Player player) {
+        return getTrajectory(loc.toVector(), player.getLocation().toVector());
     }
 
-    public static Vector getTrajectory(Location paramLocation1, Location paramLocation2) {
-        return getTrajectory(paramLocation1.toVector(), paramLocation2.toVector());
+    public static Vector getTrajectory(Location loc1, Location loc2) {
+        return getTrajectory(loc1.toVector(), loc2.toVector());
     }
 
-    public static Vector getTrajectory(Vector paramVector1, Vector paramVector2) {
-        return paramVector2.subtract(paramVector1).normalize();
+    public static Vector getTrajectory(Vector vector, Vector vector2) {
+        return vector2.subtract(vector).normalize();
     }
 
-    public static Vector getTrajectory2d(Entity paramEntity1, Entity paramEntity2) {
-        return getTrajectory2d(paramEntity1.getLocation().toVector(), paramEntity2.getLocation().toVector());
+    public static Vector getTrajectory2d(Entity entity, Entity entity2) {
+        return getTrajectory2d(entity.getLocation().toVector(), entity2.getLocation().toVector());
     }
 
-    public static Vector getTrajectory2d(Location paramLocation1, Location paramLocation2) {
-        return getTrajectory2d(paramLocation1.toVector(), paramLocation2.toVector());
+    public static Vector getTrajectory2d(Location loc1, Location loc2) {
+        return getTrajectory2d(loc1.toVector(), loc2.toVector());
     }
 
-    public static Vector getTrajectory2d(Vector paramVector1, Vector paramVector2) {
-        return paramVector2.subtract(paramVector1).setY(0).normalize();
+    public static Vector getTrajectory2d(Vector vector, Vector vector2) {
+        return vector2.subtract(vector).setY(0).normalize();
     }
 
-    public static float getPitch(Vector paramVector) {
-        double d1 = paramVector.getX();
-        double d2 = paramVector.getY();
-        double d3 = paramVector.getZ();
+    public static float getPitch(Vector vector) {
+        double d1 = vector.getX();
+        double d2 = vector.getY();
+        double d3 = vector.getZ();
         double d4 = Math.sqrt(d1 * d1 + d3 * d3);
 
         double d5 = Math.toDegrees(Math.atan(d4 / d2));
@@ -54,9 +73,9 @@ public class VelocityUtils {
         return (float) d5;
     }
 
-    public static float getYaw(Vector paramVector) {
-        double d1 = paramVector.getX();
-        double d2 = paramVector.getZ();
+    public static float getYaw(Vector vector) {
+        double d1 = vector.getX();
+        double d2 = vector.getZ();
 
         double d3 = Math.toDegrees(Math.atan(-d1 / d2));
         if (d2 < 0.0D) {
@@ -65,20 +84,20 @@ public class VelocityUtils {
         return (float) d3;
     }
 
-    public static Vector normalize(Vector paramVector) {
-        if (paramVector.length() > 0.0D) {
-            paramVector.normalize();
+    public static Vector normalize(Vector vector) {
+        if (vector.length() > 0.0D) {
+            vector.normalize();
         }
-        return paramVector;
+        return vector;
     }
 
-    public static Vector clone(Vector paramVector) {
-        return new Vector(paramVector.getX(), paramVector.getY(), paramVector.getZ());
+    public static Vector clone(Vector vector) {
+        return new Vector(vector.getX(), vector.getY(), vector.getZ());
     }
 
-    public static Vector getBumpVector(Entity paramEntity, Location paramLocation, double paramDouble) {
-        Vector localVector = paramEntity.getLocation().toVector().subtract(paramLocation.toVector()).normalize();
-        localVector.multiply(paramDouble);
+    public static Vector getBumpVector(Entity entity, Location loc, double d) {
+        Vector localVector = entity.getLocation().toVector().subtract(loc.toVector()).normalize();
+        localVector.multiply(d);
         return localVector;
     }
 
@@ -108,121 +127,121 @@ public class VelocityUtils {
         return new Vector(rx, ry, rz).normalize();
     }
 
-    public static Vector getPullVector(Entity paramEntity, Location paramLocation, double paramDouble) {
-        Vector localVector = paramLocation.toVector().subtract(paramEntity.getLocation().toVector()).normalize();
-        localVector.multiply(paramDouble);
+    public static Vector getPullVector(Entity entity, Location loc, double d) {
+        Vector localVector = loc.toVector().subtract(entity.getLocation().toVector()).normalize();
+        localVector.multiply(d);
         return localVector;
     }
 
-    public static void bumpEntity(Entity paramEntity, Location paramLocation, double paramDouble) {
-        paramEntity.setVelocity(getBumpVector(paramEntity, paramLocation, paramDouble));
+    public static void bumpEntity(Entity entity, Location loc, double d) {
+        entity.setVelocity(getBumpVector(entity, loc, d));
     }
 
-    public static void bumpEntity(Entity paramEntity, Location paramLocation, double paramDouble1, double paramDouble2) {
-        Vector localVector = getBumpVector(paramEntity, paramLocation, paramDouble1);
-        localVector.setY(paramDouble2);
-        paramEntity.setVelocity(localVector);
+    public static void bumpEntity(Entity entity, Location loc, double d1, double d2) {
+        Vector localVector = getBumpVector(entity, loc, d1);
+        localVector.setY(d2);
+        entity.setVelocity(localVector);
     }
 
-    public static void pullEntity(Entity paramEntity, Location paramLocation, double paramDouble) {
-        paramEntity.setVelocity(getPullVector(paramEntity, paramLocation, paramDouble));
+    public static void pullEntity(Entity entity, Location loc, double d) {
+        entity.setVelocity(getPullVector(entity, loc, d));
     }
 
-    public static void pullEntity(Entity paramEntity, Location paramLocation, double paramDouble1,
-                                  double paramDouble2) {
-        Vector localVector = getPullVector(paramEntity, paramLocation, paramDouble1);
-        localVector.setY(paramDouble2);
-        paramEntity.setVelocity(localVector);
+    public static void pullEntity(Entity entity, Location loc, double d1,
+                                  double d2) {
+        Vector localVector = getPullVector(entity, loc, d1);
+        localVector.setY(d2);
+        entity.setVelocity(localVector);
     }
 
-    public static void velocity(Entity paramEntity, double paramDouble1, double paramDouble2, double paramDouble3) {
-        velocity(paramEntity, paramEntity.getLocation().getDirection(), paramDouble1, false, 0.0D, paramDouble2,
-                paramDouble3);
+    public static void velocity(Entity entity, double d1, double d2, double d3) {
+        velocity(entity, entity.getLocation().getDirection(), d1, false, 0.0D, d2,
+                d3);
     }
 
-    public static void velocity(Entity paramEntity, Vector paramVector, double paramDouble1, boolean paramBoolean,
-                                double paramDouble2, double paramDouble3, double paramDouble4) {
-        if ((Double.isNaN(paramVector.getX())) || (Double.isNaN(paramVector.getY()))
-                || (Double.isNaN(paramVector.getZ())) || (paramVector.length() == 0.0D)) {
+    public static void velocity(Entity entity, Vector vector, double d1, boolean paramBoolean,
+                                double d2, double d3, double d4) {
+        if ((Double.isNaN(vector.getX())) || (Double.isNaN(vector.getY()))
+                || (Double.isNaN(vector.getZ())) || (vector.length() == 0.0D)) {
             return;
         }
         if (paramBoolean) {
-            paramVector.setY(paramDouble2);
+            vector.setY(d2);
         }
-        paramVector.normalize();
-        paramVector.multiply(paramDouble1);
+        vector.normalize();
+        vector.multiply(d1);
 
-        paramVector.setY(paramVector.getY() + paramDouble3);
-        if (paramVector.getY() > paramDouble4) {
-            paramVector.setY(paramDouble4);
+        vector.setY(vector.getY() + d3);
+        if (vector.getY() > d4) {
+            vector.setY(d4);
         }
-        paramEntity.setFallDistance(0.0F);
-        paramEntity.setVelocity(paramVector);
+        entity.setFallDistance(0.0F);
+        entity.setVelocity(vector);
     }
 
-    public static final Vector rotateAroundAxisX(Vector paramVector, double paramDouble) {
-        double d3 = Math.cos(paramDouble);
-        double d4 = Math.sin(paramDouble);
-        double d1 = paramVector.getY() * d3 - paramVector.getZ() * d4;
-        double d2 = paramVector.getY() * d4 + paramVector.getZ() * d3;
-        return paramVector.setY(d1).setZ(d2);
+    public static final Vector rotateAroundAxisX(Vector vector, double d) {
+        double d3 = Math.cos(d);
+        double d4 = Math.sin(d);
+        double d1 = vector.getY() * d3 - vector.getZ() * d4;
+        double d2 = vector.getY() * d4 + vector.getZ() * d3;
+        return vector.setY(d1).setZ(d2);
     }
 
-    public static final Vector rotateAroundAxisY(Vector paramVector, double paramDouble) {
-        double d3 = Math.cos(paramDouble);
-        double d4 = Math.sin(paramDouble);
-        double d1 = paramVector.getX() * d3 + paramVector.getZ() * d4;
-        double d2 = paramVector.getX() * -d4 + paramVector.getZ() * d3;
-        return paramVector.setX(d1).setZ(d2);
+    public static final Vector rotateAroundAxisY(Vector vector, double d) {
+        double d3 = Math.cos(d);
+        double d4 = Math.sin(d);
+        double d1 = vector.getX() * d3 + vector.getZ() * d4;
+        double d2 = vector.getX() * -d4 + vector.getZ() * d3;
+        return vector.setX(d1).setZ(d2);
     }
 
-    public static final Vector rotateAroundAxisZ(Vector paramVector, double paramDouble) {
-        double d3 = Math.cos(paramDouble);
-        double d4 = Math.sin(paramDouble);
-        double d1 = paramVector.getX() * d3 - paramVector.getY() * d4;
-        double d2 = paramVector.getX() * d4 + paramVector.getY() * d3;
-        return paramVector.setX(d1).setY(d2);
+    public static final Vector rotateAroundAxisZ(Vector vector, double d) {
+        double d3 = Math.cos(d);
+        double d4 = Math.sin(d);
+        double d1 = vector.getX() * d3 - vector.getY() * d4;
+        double d2 = vector.getX() * d4 + vector.getY() * d3;
+        return vector.setX(d1).setY(d2);
     }
 
-    public static final Vector rotateVector(Vector paramVector, double paramDouble1, double paramDouble2,
-                                            double paramDouble3) {
-        rotateAroundAxisX(paramVector, paramDouble1);
-        rotateAroundAxisY(paramVector, paramDouble2);
-        rotateAroundAxisZ(paramVector, paramDouble3);
-        return paramVector;
+    public static final Vector rotateVector(Vector vector, double d1, double d2,
+                                            double d3) {
+        rotateAroundAxisX(vector, d1);
+        rotateAroundAxisY(vector, d2);
+        rotateAroundAxisZ(vector, d3);
+        return vector;
     }
 
-    public static final double angleToXAxis(Vector paramVector) {
-        return Math.atan2(paramVector.getX(), paramVector.getY());
+    public static final double angleToXAxis(Vector vector) {
+        return Math.atan2(vector.getX(), vector.getY());
     }
 
-    public static void velocity(Entity paramEntity, double paramDouble1, double paramDouble2, double paramDouble3,
+    public static void velocity(Entity entity, double d1, double d2, double d3,
                                 boolean paramBoolean) {
-        velocity(paramEntity, paramEntity.getLocation().getDirection(), paramDouble1, false, 0.0D, paramDouble2,
-                paramDouble3, paramBoolean);
+        velocity(entity, entity.getLocation().getDirection(), d1, false, 0.0D, d2,
+                d3, paramBoolean);
     }
 
-    public static void velocity(Entity paramEntity, Vector paramVector, double paramDouble1, boolean paramBoolean1,
-                                double paramDouble2, double paramDouble3, double paramDouble4, boolean paramBoolean2) {
-        if ((Double.isNaN(paramVector.getX())) || (Double.isNaN(paramVector.getY()))
-                || (Double.isNaN(paramVector.getZ())) || (paramVector.length() == 0.0D)) {
+    public static void velocity(Entity entity, Vector vector, double d1, boolean paramBoolean1,
+                                double d2, double d3, double d4, boolean paramBoolean2) {
+        if ((Double.isNaN(vector.getX())) || (Double.isNaN(vector.getY()))
+                || (Double.isNaN(vector.getZ())) || (vector.length() == 0.0D)) {
             return;
         }
         if (paramBoolean1) {
-            paramVector.setY(paramDouble2);
+            vector.setY(d2);
         }
-        paramVector.normalize();
-        paramVector.multiply(paramDouble1);
+        vector.normalize();
+        vector.multiply(d1);
 
-        paramVector.setY(paramVector.getY() + paramDouble3);
-        if (paramVector.getY() > paramDouble4) {
-            paramVector.setY(paramDouble4);
+        vector.setY(vector.getY() + d3);
+        if (vector.getY() > d4) {
+            vector.setY(d4);
         }
         if (paramBoolean2) {
-            paramVector.setY(paramVector.getY() + 0.2D);
+            vector.setY(vector.getY() + 0.2D);
         }
-        paramEntity.setFallDistance(0.0F);
-        paramEntity.setVelocity(paramVector);
+        entity.setFallDistance(0.0F);
+        entity.setVelocity(vector);
     }
 
     public static Vector getBackVector(Location loc) {

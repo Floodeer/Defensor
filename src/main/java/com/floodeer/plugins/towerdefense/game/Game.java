@@ -284,14 +284,19 @@ public class Game implements Listener {
             if (getState() == Enums.GameState.IN_GAME || getState() == Enums.GameState.ENDING) {
                 scoreboard.setSlotsFromList(Lists.newArrayList(
                         Util.createSpacer(),
+                        Util.color("&fTempo: &a" + TimeUtils.formatScoreboard(getTimer())),
+                        Util.createSpacer(),
                         Util.color("&fMapa: &a" + getName()),
                         Util.color("&fPlayers: &a" + getPlayers().size()),
                         Util.createSpacer(),
-                        Util.color("&fRodada: &a" + getCurrentWave()),
                         Util.color("&fDificuldade: " + getDifficulty().getColoredName()),
+                        Util.createSpacer(),
+                        Util.color("&fInimigos: &a" + getEnemiesCount() + "&f/&b" + difficulty.getEnemiesPerWave()),
+                        Util.color("&fRodada: &a" + getCurrentWave() + "&f/&b" + difficulty.getFinalWave()),
+                        Util.color("&fTorres: &a" + getTowers().size()),
                         Util.color("&fVida: &a" + getCurrentHealth()),
                         Util.createSpacer(),
-                        Util.color("&fTempo: &a" + TimeUtils.formatScoreboard(getTimer()))));
+                        Util.color("&fCoins: &a" + players.get(player))));
             } else {
                 scoreboard.setSlotsFromList(Lists.newArrayList(
                         Util.createSpacer(),
@@ -311,7 +316,14 @@ public class Game implements Listener {
     }
 
     public boolean hasLivingEnemies() {
-        return getEnemies() != null && (getEnemies().size() > 0);
+        return getEnemiesCount() > 0;
+    }
+
+    public int getEnemiesCount() {
+        if(getEnemies() == null)
+            return 0;
+
+        return getEnemies().size();
     }
 
     public void addCoins(GamePlayer player, double coins) {

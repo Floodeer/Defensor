@@ -75,6 +75,15 @@ public class Enums {
 
         TowerUltimate(String name) { this.name = name; }
 
+        @Override
+        public String toString() {
+            return name;
+        }
+
+        public static TowerUltimate fromString(String str) {
+            return Arrays.stream(TowerUltimate.values()).filter(cur -> cur.toString().equalsIgnoreCase(str)).findAny().orElse(null);
+        }
+
     }
 
     public enum Difficulty {

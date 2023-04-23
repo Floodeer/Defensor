@@ -9,6 +9,7 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.inventory.ItemStack;
 
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
@@ -60,7 +61,11 @@ public class IconCore implements Listener {
 
     public void setOptionMetadata(Player player, int position, ItemStack item) {
         if (menu.containsKey(player)) {
-            menu.get(player).setOption(position, item, item.getItemMeta().getDisplayName(), item.getItemMeta().getLore());
+            if(item.getItemMeta().getLore() == null) {
+                menu.get(player).setOption(position, item, item.getItemMeta().getDisplayName(), Arrays.asList(" "));
+            }else{
+                menu.get(player).setOption(position, item, item.getItemMeta().getDisplayName(), item.getItemMeta().getLore());
+            }
         }
     }
 

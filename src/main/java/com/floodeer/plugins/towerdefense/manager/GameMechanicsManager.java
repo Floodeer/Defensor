@@ -123,7 +123,7 @@ public class GameMechanicsManager implements Listener {
             enemy.getEntity().setVelocity(enemy.getEntity().getLocation().toVector().subtract(targetLocation.toVector()).normalize().multiply(-enemy.getSpeed()));
             double distanceSquared = entity.getLocation().distanceSquared(targetLocation);
 
-            if (distanceSquared < 1.0D) {
+            if (distanceSquared < 1.0D + enemy.getSpeed()) {
                 enemy.setPathIndex(enemy.getPathIndex()+1);
                 if (enemy.getPathIndex() >= arena.getArena().getPath().size()) {
                     enemy.getEntity().getWorld().spawnParticle(Particle.EXPLOSION_HUGE, enemy.getEntity().getLocation(), 5, 0, 0, 0, 0.1F);

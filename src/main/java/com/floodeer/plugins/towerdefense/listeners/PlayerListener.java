@@ -2,10 +2,13 @@ package com.floodeer.plugins.towerdefense.listeners;
 
 import com.floodeer.plugins.towerdefense.Defensor;
 import com.floodeer.plugins.towerdefense.database.data.GamePlayer;
+import com.floodeer.plugins.towerdefense.game.Enums;
 import com.floodeer.plugins.towerdefense.game.GameMenus;
 import com.floodeer.plugins.towerdefense.utils.ItemFactory;
 import com.floodeer.plugins.towerdefense.utils.Items;
 import com.floodeer.plugins.towerdefense.utils.Runner;
+import net.citizensnpcs.api.event.NPCRightClickEvent;
+import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
@@ -40,6 +43,18 @@ public class PlayerListener implements Listener {
             if(e.getItem() != null && e.getItem().isSimilar(Defensor.get().getItems().getTowerMenuItem())) {
                 GameMenus.buildTowerMenu(e.getPlayer());
             }
+        }
+    }
+
+    @EventHandler
+    public void onInteract(NPCRightClickEvent e) {
+        GamePlayer gp = GamePlayer.get(e.getClicker().getPlayer());
+        if(gp.isInGame() && gp.getGame().getState() == Enums.GameState.IN_GAME) {
+            gp.getGame().getTowers().forEach(cur -> {
+                if(cur.getEntity().getTowerEntity().equals(e.getNPC())) {
+                    cur.openInterface(e.getClicker());
+                }
+            });
         }
     }
 

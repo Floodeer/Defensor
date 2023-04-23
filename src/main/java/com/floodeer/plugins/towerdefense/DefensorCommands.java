@@ -4,7 +4,6 @@ import com.floodeer.plugins.towerdefense.database.data.GamePlayer;
 import com.floodeer.plugins.towerdefense.game.Enums;
 import com.floodeer.plugins.towerdefense.game.Game;
 import com.floodeer.plugins.towerdefense.game.GameArena;
-import com.floodeer.plugins.towerdefense.utils.ProtocolUtils;
 import com.floodeer.plugins.towerdefense.utils.Runner;
 import com.floodeer.plugins.towerdefense.utils.Util;
 import net.citizensnpcs.api.CitizensAPI;
@@ -23,7 +22,15 @@ public class DefensorCommands implements CommandExecutor {
 
         if(args[0].equalsIgnoreCase("test")) {
             Player p = (Player) commandSender;
-            ProtocolUtils.playNPCAttackAnimation(CitizensAPI.getDefaultNPCSelector().getSelected(p));
+            GamePlayer gp = GamePlayer.get(p);
+            gp.getGame().getTowers().forEach(cur -> cur.setUltimateEnergy(100));
+
+            p.sendMessage(Util.color("&aTestado!"));
+        }else  if(args[0].equalsIgnoreCase("test2")) {
+            Player p = (Player) commandSender;
+            GamePlayer gp = GamePlayer.get(p);
+            gp.getGame().getTowers().forEach(cur -> cur.setUltimateEnergy(0));
+
             p.sendMessage(Util.color("&aTestado!"));
         }
         if(args[0].equalsIgnoreCase("create")) {
